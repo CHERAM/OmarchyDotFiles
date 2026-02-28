@@ -24,6 +24,7 @@
   padding: 0 8px;
   margin: 0 2px;
   min-width: 12px;
+  font-size: 17px;
   opacity: 0.5;
 }
 
@@ -72,6 +73,17 @@ tooltip {
   font-size: 12px;
 }
 
+#custom-omarchy,
+#bluetooth,
+#network,
+#pulseaudio,
+#cpu,
+#battery,
+#custom-expand-icon,
+#custom-voxtype {
+  font-size: 16px;
+}
+
 #clock {
   margin-left: 8.75px;
 }
@@ -87,7 +99,7 @@ tooltip {
   min-width: 12px;
   margin-left: 5px;
   margin-right: 0;
-  font-size: 12px;
+  font-size: 14px;
   padding-bottom: 1px;
 }
 
@@ -108,5 +120,4 @@ tooltip {
 #custom-notification-silencing-indicator.active {
   color: #a55555;
 }
-
 
