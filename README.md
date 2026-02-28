@@ -71,6 +71,26 @@ Files responsible for that behavior:
 - `config-home/.local/share/music-control-room/lyrics.html`
 - `config-home/.config/cava/config`
 
+## Workspace 9 Communications Room
+
+Workspace `9` / `109` is customized as a communications workspace:
+
+- left monitor workspace `9` is the communications anchor workspace
+- right monitor workspace `109` is used for secondary communications apps
+- Waybar shows workspace `9` and `109` with the communications icon `󰍩`
+
+On the first visit to workspace `9`, the workspace sync script can launch:
+
+- Gmail on workspace `9` via `omarchy-launch-webapp`
+- WhatsApp Web on workspace `109` via `omarchy-launch-webapp`
+- Discord on workspace `109` via `uwsm-app -- discord`
+
+Files responsible for that behavior:
+
+- `config-home/.config/hypr/scripts/workspace-sync.sh`
+- `config-home/.config/waybar/config.jsonc`
+- `workspace-9-communications-plan.md`
+
 ## Setup
 
 Install dependencies:
