@@ -77,6 +77,39 @@ dispatch() {
   hyprctl dispatch "$@" >/dev/null
 }
 
+spotify_is_running() {
+  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "spotify")' >/dev/null
+}
+
+sync_workspace_pair() {
+  local base_workspace="$1"
+
+  if (( base_workspace >= 1 && base_workspace <= 10 )) && (( monitor_count > 1 )); then
+    dispatch focusmonitor "$left_monitor"
+    dispatch focusworkspaceoncurrentmonitor "$base_workspace"
+    dispatch focusmonitor "$right_monitor"
+    dispatch focusworkspaceoncurrentmonitor "$((base_workspace + 100))"
+    dispatch focusmonitor "$focused_monitor"
+  else
+    dispatch workspace "$base_workspace"
+  fi
+}
+
+launch_spotify_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 10 )); then
+    return 1
+  fi
+
+  if spotify_is_running; then
+    return 1
+  fi
+
+  setsid uwsm-app -- spotify >/dev/null 2>&1 &
+  return 0
+}
+
 resolve_numbered_workspace() {
   local requested_workspace="$1"
 
@@ -171,14 +204,10 @@ fi
 
 case "$action" in
   switch)
-    if (( workspace >= 1 && workspace <= 10 )) && (( monitor_count > 1 )); then
-      dispatch focusmonitor "$left_monitor"
-      dispatch focusworkspaceoncurrentmonitor "$workspace"
-      dispatch focusmonitor "$right_monitor"
-      dispatch focusworkspaceoncurrentmonitor "$((workspace + 100))"
-      dispatch focusmonitor "$focused_monitor"
-    else
-      dispatch workspace "$workspace"
+    sync_workspace_pair "$workspace"
+    if launch_spotify_for_workspace "$workspace"; then
+      sleep 0.3
+      sync_workspace_pair "$workspace"
     fi
     ;;
   move)
