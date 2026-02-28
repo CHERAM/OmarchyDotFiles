@@ -77,29 +77,55 @@ dispatch() {
   hyprctl dispatch "$@" >/dev/null
 }
 
+dispatch_exec() {
+  hyprctl dispatch exec "$1" >/dev/null
+}
+
 window_address_by_title() {
   local title="$1"
   hyprctl -j clients 2>/dev/null | jq -r --arg title "$title" '.[] | select(.title == $title) | .address' | head -n1
 }
 
+window_address_by_filter() {
+  local jq_filter="$1"
+  hyprctl -j clients 2>/dev/null | jq -r "$jq_filter | .address" | head -n1
+}
+
+client_matches() {
+  local jq_filter="$1"
+  hyprctl -j clients 2>/dev/null | jq -e "$jq_filter" >/dev/null
+}
+
 spotify_is_running() {
-  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "spotify")' >/dev/null
+  client_matches '.[] | select(.class == "spotify")'
 }
 
 visualizer_is_running() {
-  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicVisualizer")' >/dev/null
+  client_matches '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicVisualizer")'
 }
 
 pulse_is_running() {
-  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.title == "MusicPulse")' >/dev/null
+  client_matches '.[] | select(.title == "MusicPulse")'
 }
 
 lyrics_panel_is_running() {
-  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.title == "MusicLyrics")' >/dev/null
+  client_matches '.[] | select(.title == "MusicLyrics")'
 }
 
 dashboard_panel_is_running() {
-  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicDashboard")' >/dev/null
+  client_matches '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicDashboard")'
+}
+
+gmail_is_running() {
+  client_matches '.[] | select(.title | test("gmail|inbox"; "i"))'
+}
+
+whatsapp_is_running() {
+  client_matches '.[] | select(.title | test("whatsapp"; "i"))'
+}
+
+discord_is_running() {
+  client_matches '.[] | select(.class | test("^discord$"; "i"))'
 }
 
 sync_workspace_pair() {
@@ -263,6 +289,89 @@ launch_dashboard_panel_for_workspace() {
   return 0
 }
 
+launch_command_on_workspace() {
+  local target_workspace="$1"
+  local command="$2"
+
+  dispatch_exec "[workspace ${target_workspace} silent] ${command}"
+}
+
+move_window_to_workspace_when_ready() {
+  local jq_filter="$1"
+  local target_workspace="$2"
+  local address
+
+  for _ in $(seq 1 40); do
+    address="$(window_address_by_filter "$jq_filter")"
+    if [[ -n "$address" && "$address" != "null" ]]; then
+      dispatch movetoworkspacesilent "${target_workspace},address:${address}"
+      return 0
+    fi
+    sleep 0.2
+  done
+
+  return 1
+}
+
+launch_gmail_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 9 )); then
+    return 1
+  fi
+
+  if ! command -v omarchy-launch-webapp >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if gmail_is_running; then
+    return 1
+  fi
+
+  launch_command_on_workspace 9 'omarchy-launch-webapp "https://mail.google.com/mail/u/0/#inbox"'
+  return 0
+}
+
+launch_whatsapp_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 9 )); then
+    return 1
+  fi
+
+  if ! command -v omarchy-launch-webapp >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if whatsapp_is_running; then
+    return 1
+  fi
+
+  launch_command_on_workspace 109 'omarchy-launch-webapp "https://web.whatsapp.com/"'
+  move_window_to_workspace_when_ready '.[] | select(.class == "chrome-web.whatsapp.com__-Default")' 109 &
+  return 0
+}
+
+launch_discord_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 9 )); then
+    return 1
+  fi
+
+  if ! command -v discord >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if discord_is_running; then
+    return 1
+  fi
+
+  launch_command_on_workspace 109 "uwsm-app -- discord"
+  move_window_to_workspace_when_ready '.[] | select(.class == "discord")' 109 &
+  return 0
+}
+
 resolve_numbered_workspace() {
   local requested_workspace="$1"
 
@@ -359,6 +468,15 @@ case "$action" in
   switch)
     sync_workspace_pair "$workspace"
     launched_workspace_apps=1
+    if launch_gmail_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_whatsapp_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_discord_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
     if launch_spotify_for_workspace "$workspace"; then
       launched_workspace_apps=0
     fi
