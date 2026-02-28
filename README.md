@@ -32,12 +32,14 @@ Managed files live here:
 
 ```text
 config-home/.config/
+config-home/.local/bin/
 ```
 
 Stow links them into:
 
 ```text
 ~/.config/
+~/.local/bin/
 ```
 
 ## Setup
@@ -116,6 +118,7 @@ Check where a live file points:
 
 ```bash
 readlink -f ~/.config/hypr/workspaces.conf
+readlink -f ~/.local/bin/omarchy-launch-code
 ```
 
 Reload after Hyprland/Waybar changes:
@@ -129,4 +132,5 @@ omarchy-restart-waybar
 
 - Omarchy defaults live under `~/.local/share/omarchy/default/`
 - this repo is for local overrides only
+- custom launcher overrides can live in `~/.local/bin/`; bind them explicitly if Omarchy's bin appears earlier in `PATH`
 - avoid tracking large app-state folders like Chromium or VS Code backups

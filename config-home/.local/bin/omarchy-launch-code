@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Dotfiles-managed override for Omarchy's VS Code launcher.
+# Keeps launch behavior in this repo instead of under ~/.local/share/omarchy/.
+
+if omarchy-cmd-missing gtk-launch; then
+  notify-send "Visual Studio Code not found" "Install the code package to use this launcher."
+  exit 1
+fi
+
+exec omarchy-launch-or-focus code "gtk-launch code"
