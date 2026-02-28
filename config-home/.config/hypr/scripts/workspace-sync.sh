@@ -44,8 +44,7 @@ if [[ -z "$monitors_json" || "$monitors_json" == "[]" ]]; then
     move-silent)
       hyprctl dispatch movetoworkspacesilent "$workspace" >/dev/null 2>&1 || true
       ;;
-    move-monitor-left|move-monitor-right|move-monitor-left-silent|move-monitor-right-silent)
-    switch-next|switch-prev)
+    move-monitor-left|move-monitor-right|move-monitor-left-silent|move-monitor-right-silent|switch-next|switch-prev)
       :
       ;;
   esac
