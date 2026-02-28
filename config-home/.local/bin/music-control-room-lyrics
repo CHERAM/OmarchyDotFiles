@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+
+import json
+import re
+import subprocess
+import textwrap
+import time
+import urllib.parse
+import urllib.request
+
+
+SEARCH_URL = "https://lrclib.net/api/search"
+SYNC_PATTERN = re.compile(r"^\[(\d+):(\d+(?:\.\d+)?)\](.*)$")
+
+
+def run_playerctl(*args: str) -> str:
+    result = subprocess.run(
+        ["playerctl", "-p", "spotify", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
+
+
+def now_playing():
+    status = run_playerctl("status")
+    if not status:
+      return None
+
+    return {
+        "status": status,
+        "title": run_playerctl("metadata", "xesam:title"),
+        "artist": run_playerctl("metadata", "xesam:artist"),
+        "album": run_playerctl("metadata", "xesam:album"),
+        "position": float(run_playerctl("position") or "0"),
+    }
+
+
+def fetch_lyrics(title: str, artist: str):
+    if not title or not artist:
+        return None
+
+    params = urllib.parse.urlencode({"track_name": title, "artist_name": artist})
+    try:
+        with urllib.request.urlopen(f"{SEARCH_URL}?{params}", timeout=6) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return None
+
+    if not payload:
+        return None
+
+    best = payload[0]
+    return {
+        "plain": (best.get("plainLyrics") or "").strip(),
+        "synced": (best.get("syncedLyrics") or "").strip(),
+    }
+
+
+def parse_synced(text: str):
+    rows = []
+    for raw_line in text.splitlines():
+        match = SYNC_PATTERN.match(raw_line)
+        if not match:
+            continue
+        minutes, seconds, lyric = match.groups()
+        rows.append((int(minutes) * 60 + float(seconds), lyric.strip() or "..."))
+    return rows
+
+
+def render_plain(track, lyrics):
+    lines = lyrics.splitlines() if lyrics else ["No lyrics found for this track."]
+    wrapped = []
+    for line in lines:
+        wrapped.extend(textwrap.wrap(line, width=64) or [""])
+    wrapped = wrapped[:14]
+    print("LYRICS")
+    print()
+    print(f"Track   {track['title'] or 'Unknown'}")
+    print(f"Artist  {track['artist'] or 'Unknown'}")
+    print()
+    for line in wrapped:
+        print(line)
+
+
+def render_synced(track, rows):
+    current = 0
+    for idx, (timestamp, _) in enumerate(rows):
+        if timestamp <= track["position"]:
+            current = idx
+        else:
+            break
+
+    start = max(0, current - 4)
+    end = min(len(rows), current + 5)
+
+    print("LYRICS")
+    print()
+    print(f"Track   {track['title'] or 'Unknown'}")
+    print(f"Artist  {track['artist'] or 'Unknown'}")
+    print()
+
+    for idx in range(start, end):
+        _, line = rows[idx]
+        prefix = ">>" if idx == current else "  "
+        wrapped = textwrap.wrap(line, width=58) or [""]
+        for wrapped_index, part in enumerate(wrapped[:2]):
+            inner_prefix = prefix if wrapped_index == 0 else "  "
+            print(f"{inner_prefix} {part}")
+        print()
+
+
+def main():
+    cached_key = None
+    cached_lyrics = None
+
+    while True:
+        print("\033c", end="")
+        track = now_playing()
+        if not track:
+            print("LYRICS\n\nSpotify is not active.")
+            time.sleep(2)
+            continue
+
+        current_key = (track["artist"], track["title"])
+        if current_key != cached_key:
+            cached_lyrics = fetch_lyrics(track["title"], track["artist"])
+            cached_key = current_key
+
+        if not cached_lyrics:
+            render_plain(track, "")
+            time.sleep(3)
+            continue
+
+        synced_rows = parse_synced(cached_lyrics["synced"])
+        if synced_rows:
+            render_synced(track, synced_rows)
+            time.sleep(1)
+            continue
+
+        render_plain(track, cached_lyrics["plain"])
+        time.sleep(3)
+
+
+if __name__ == "__main__":
+    main()

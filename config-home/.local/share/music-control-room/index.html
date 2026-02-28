@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MusicPulse</title>
+  <style>
+    :root {
+      --bg-1: #081018;
+      --bg-2: #10161f;
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #edf4fb;
+      --muted: #9caec2;
+      --a: #72a9ff;
+      --b: #82ded6;
+      --c: #b1e184;
+      --d: #f1b37b;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(114, 169, 255, 0.22), transparent 26%),
+        radial-gradient(circle at 80% 20%, rgba(130, 222, 214, 0.16), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(241, 179, 123, 0.14), transparent 30%),
+        linear-gradient(180deg, var(--bg-2), var(--bg-1));
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    main {
+      position: relative;
+      inset: 0;
+      height: 100%;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(13, 18, 26, 0.72);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .top, .bottom {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .center {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .meta {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 20px;
+      display: grid;
+      gap: 4px;
+      z-index: 1;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.55);
+    }
+
+    .title {
+      font-size: clamp(18px, 2vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .artist {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .badge {
+      color: var(--text);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="top panel">
+      <span>Secondary Visualizer</span>
+      <span class="badge" id="status">Idle</span>
+    </section>
+    <section class="center panel">
+      <canvas id="scene"></canvas>
+      <div class="meta">
+        <div class="title" id="title">Waiting for Spotify</div>
+        <div class="artist" id="artist">Workspace 10 pulse field</div>
+      </div>
+    </section>
+    <section class="bottom panel">
+      <span id="album">No album</span>
+      <span id="clock">00:00 / 00:00</span>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("scene");
+    const ctx = canvas.getContext("2d");
+    let data = { active: false, position: 0, length: 0, volume: 0, status: "Idle", title: "", artist: "", album: "" };
+    let bars = Array.from({ length: 36 }, () => 0.25);
+
+    function resize() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = canvas.clientWidth * ratio;
+      canvas.height = canvas.clientHeight * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function fmt(seconds) {
+      const total = Math.max(0, Math.floor(seconds || 0));
+      const mins = String(Math.floor(total / 60)).padStart(2, "0");
+      const secs = String(total % 60).padStart(2, "0");
+      return `${mins}:${secs}`;
+    }
+
+    async function refresh() {
+      const [res, themeRes] = await Promise.all([
+        fetch(`/api/now-playing?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/theme?ts=${Date.now()}`, { cache: "no-store" }),
+      ]);
+      data = await res.json();
+      const theme = await themeRes.json();
+      applyTheme(theme);
+      document.getElementById("status").textContent = data.active ? data.status : "Idle";
+      document.getElementById("title").textContent = data.active ? (data.title || "Unknown Track") : "Waiting for Spotify";
+      document.getElementById("artist").textContent = data.active ? (data.artist || "Unknown Artist") : "Workspace 10 pulse field";
+      document.getElementById("album").textContent = data.active ? (data.album || "Unknown Album") : "No album";
+      document.getElementById("clock").textContent = `${fmt(data.position)} / ${fmt(data.length)}`;
+    }
+
+    function draw(ts) {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const cx = w * 0.5;
+      const cy = h * 0.48;
+      const volume = (data.volume || 0) / 100;
+      const progress = data.length ? data.position / data.length : 0;
+      const pulse = 0.55 + Math.sin(ts / 380) * 0.22 + volume * 0.4;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const styles = getComputedStyle(document.documentElement);
+      const a = styles.getPropertyValue("--a").trim();
+      const b = styles.getPropertyValue("--b").trim();
+      const c = styles.getPropertyValue("--c").trim();
+      const d = styles.getPropertyValue("--d").trim();
+
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, `${a}1c`);
+      grad.addColorStop(0.5, `${b}14`);
+      grad.addColorStop(1, `${d}14`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < 36; i++) {
+        const base = 0.18 + (Math.sin(ts / 420 + i * 0.33) + 1) * 0.15 + volume * 0.5;
+        bars[i] += (base - bars[i]) * 0.16;
+      }
+
+      const radius = Math.min(w, h) * 0.22;
+      const ringColors = [a, b, c, d];
+      ringColors.forEach((color, idx) => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + idx * 28 + pulse * idx * 8, 0, Math.PI * 2);
+        ctx.strokeStyle = color + "55";
+        ctx.lineWidth = 2 + idx;
+        ctx.stroke();
+      });
+
+      const barCount = bars.length;
+      const maxBarHeight = h * 0.25;
+      const barWidth = (w - 90) / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const value = bars[i];
+        const x = 24 + i * barWidth;
+        const barHeight = Math.max(12, value * maxBarHeight);
+        const y = h - 72 - barHeight;
+        const hueMix = i / barCount;
+        const color = hueMix < 0.33 ? a : hueMix < 0.66 ? b : d;
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.85;
+        ctx.fillRect(x, y, barWidth * 0.58, barHeight);
+      }
+      ctx.globalAlpha = 1;
+
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.62, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.stroke();
+
+      requestAnimationFrame(draw);
+    }
+
+    function applyTheme(theme) {
+      const root = document.documentElement.style;
+      root.setProperty("--bg-1", theme.background || "#2d353b");
+      root.setProperty("--bg-2", theme.color0 || theme.background || "#475258");
+      root.setProperty("--text", theme.foreground || "#d3c6aa");
+      root.setProperty("--muted", theme.color8 || "#475258");
+      root.setProperty("--line", `${(theme.color8 || "#475258").trim()}55`);
+      root.setProperty("--a", theme.accent || "#7fbbb3");
+      root.setProperty("--b", theme.color14 || "#83c092");
+      root.setProperty("--c", theme.color10 || "#a7c080");
+      root.setProperty("--d", theme.color11 || "#dbbc7f");
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    refresh();
+    setInterval(refresh, 2000);
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

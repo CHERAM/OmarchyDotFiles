@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MusicLyrics</title>
+  <style>
+    :root {
+      --bg-1: #0a1018;
+      --bg-2: #121826;
+      --line: rgba(255,255,255,0.08);
+      --text: #eef5fb;
+      --muted: #a0b2c4;
+      --accent-a: #78b0ff;
+      --accent-b: #87e0d5;
+      --accent-c: #f0b37d;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(120,176,255,0.18), transparent 28%),
+        radial-gradient(circle at 82% 12%, rgba(135,224,213,0.12), transparent 26%),
+        linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    }
+    .shell {
+      height: 100%;
+      padding: 18px;
+    }
+    .panel {
+      height: 100%;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(14, 20, 31, 0.78);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.28);
+    }
+    .lyrics {
+      height: 100%;
+      padding: 22px 24px;
+      display: grid;
+      grid-template-rows: repeat(6, minmax(0, 1fr));
+      align-items: center;
+      gap: 4px;
+    }
+    .line {
+      font-size: 20px;
+      line-height: 1.18;
+      color: var(--muted);
+      transition: transform 180ms ease, color 180ms ease, opacity 180ms ease;
+      opacity: 0.58;
+      min-height: 1.28em;
+      display: flex;
+      align-items: center;
+    }
+    .line.active {
+      color: var(--text);
+      opacity: 1;
+      transform: translateX(12px) scale(1.01);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="lyrics panel">
+      <div class="line" id="line0"></div>
+      <div class="line" id="line1"></div>
+      <div class="line" id="line2"></div>
+      <div class="line" id="line3"></div>
+      <div class="line" id="line4"></div>
+      <div class="line" id="line5"></div>
+    </section>
+  </div>
+  <script>
+    async function refresh() {
+      const [trackRes, lyricsRes, themeRes] = await Promise.all([
+        fetch(`/api/now-playing?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/lyrics?ts=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/theme?ts=${Date.now()}`, { cache: "no-store" }),
+      ]);
+      const track = await trackRes.json();
+      const lyrics = await lyricsRes.json();
+      const theme = await themeRes.json();
+      applyTheme(theme);
+
+      const lines = lyrics.lines || [];
+      for (let i = 0; i < 6; i++) {
+        const el = document.getElementById(`line${i}`);
+        const item = lines[i];
+        el.textContent = item ? item.text : "";
+        el.classList.toggle("active", Boolean(item && item.active));
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 500);
+
+    function applyTheme(theme) {
+      const root = document.documentElement.style;
+      root.setProperty("--bg-1", theme.background || "#2d353b");
+      root.setProperty("--bg-2", theme.color0 || theme.background || "#475258");
+      root.setProperty("--text", theme.foreground || "#d3c6aa");
+      root.setProperty("--muted", theme.color8 || "#475258");
+      root.setProperty("--line", `${(theme.color8 || "#475258").trim()}55`);
+      root.setProperty("--accent-a", theme.accent || "#7fbbb3");
+      root.setProperty("--accent-b", theme.color14 || "#83c092");
+      root.setProperty("--accent-c", theme.color11 || "#dbbc7f");
+    }
+  </script>
+</body>
+</html>

@@ -33,6 +33,7 @@ Managed files live here:
 ```text
 config-home/.config/
 config-home/.local/bin/
+config-home/.local/share/music-control-room/
 ```
 
 Stow links them into:
@@ -40,7 +41,35 @@ Stow links them into:
 ```text
 ~/.config/
 ~/.local/bin/
+~/.local/share/music-control-room/
 ```
+
+## Workspace 0 Music Control Room
+
+Workspace `0` / `10` is customized as a music workspace:
+
+- left monitor workspace `10` launches a music control room
+- right monitor workspace `110` launches Spotify
+- `SUPER + SHIFT + M` jumps directly to that workspace
+
+Left-side control room panes:
+
+- `MusicVisualizer`: main `cava` visualizer in Ghostty
+- `MusicPulse`: browser-based secondary visualizer
+- `MusicLyrics`: browser-based lyrics pane
+- `MusicDashboard`: compact now-playing dashboard
+
+Files responsible for that behavior:
+
+- `config-home/.config/hypr/hyprland.conf`
+- `config-home/.config/hypr/bindings.conf`
+- `config-home/.config/hypr/scripts/workspace-sync.sh`
+- `config-home/.local/bin/music-control-room-cava`
+- `config-home/.local/bin/music-control-room-server`
+- `config-home/.local/bin/music-control-room-status`
+- `config-home/.local/share/music-control-room/index.html`
+- `config-home/.local/share/music-control-room/lyrics.html`
+- `config-home/.config/cava/config`
 
 ## Setup
 
@@ -119,6 +148,8 @@ Check where a live file points:
 ```bash
 readlink -f ~/.config/hypr/workspaces.conf
 readlink -f ~/.local/bin/omarchy-launch-code
+readlink -f ~/.local/bin/music-control-room-server
+readlink -f ~/.local/share/music-control-room/index.html
 ```
 
 Reload after Hyprland/Waybar changes:

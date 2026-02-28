@@ -77,6 +77,11 @@ dispatch() {
   hyprctl dispatch "$@" >/dev/null
 }
 
+window_address_by_title() {
+  local title="$1"
+  hyprctl -j clients 2>/dev/null | jq -r --arg title "$title" '.[] | select(.title == $title) | .address' | head -n1
+}
+
 spotify_is_running() {
   hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "spotify")' >/dev/null
 }
@@ -85,18 +90,41 @@ visualizer_is_running() {
   hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicVisualizer")' >/dev/null
 }
 
+pulse_is_running() {
+  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.title == "MusicPulse")' >/dev/null
+}
+
+lyrics_panel_is_running() {
+  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.title == "MusicLyrics")' >/dev/null
+}
+
+dashboard_panel_is_running() {
+  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicDashboard")' >/dev/null
+}
+
 sync_workspace_pair() {
   local base_workspace="$1"
 
   if (( base_workspace >= 1 && base_workspace <= 10 )) && (( monitor_count > 1 )); then
     dispatch focusmonitor "$left_monitor"
-    dispatch focusworkspaceoncurrentmonitor "$base_workspace"
+    dispatch workspace "$base_workspace"
     dispatch focusmonitor "$right_monitor"
-    dispatch focusworkspaceoncurrentmonitor "$((base_workspace + 100))"
+    dispatch workspace "$((base_workspace + 100))"
     dispatch focusmonitor "$focused_monitor"
   else
     dispatch workspace "$base_workspace"
   fi
+}
+
+delayed_sync_workspace_pair() {
+  local base_workspace="$1"
+
+  (
+    sleep 2
+    sync_workspace_pair "$base_workspace"
+    sleep 3
+    sync_workspace_pair "$base_workspace"
+  ) >/dev/null 2>&1 &
 }
 
 launch_spotify_for_workspace() {
@@ -129,7 +157,109 @@ launch_visualizer_for_workspace() {
     return 1
   fi
 
-  setsid uwsm-app -- ghostty --title=MusicVisualizer -e cava >/dev/null 2>&1 &
+  setsid uwsm-app -- ghostty --title=MusicVisualizer -e ~/.local/bin/music-control-room-cava >/dev/null 2>&1 &
+  return 0
+}
+
+layout_pulse_window() {
+  local pulse_address
+  local floating
+
+  for _ in $(seq 1 25); do
+    pulse_address="$(window_address_by_title "MusicPulse")"
+    if [[ -n "$pulse_address" && "$pulse_address" != "null" ]]; then
+      floating="$(hyprctl -j clients 2>/dev/null | jq -r --arg addr "$pulse_address" '.[] | select(.address == $addr) | (.floating | tostring)')"
+      dispatch focuswindow "address:$pulse_address"
+      if [[ "$floating" != "true" ]]; then
+        dispatch togglefloating
+      fi
+      dispatch resizeactive exact 804 280
+      dispatch moveactive exact 1104 38
+      return
+    fi
+    sleep 0.2
+  done
+}
+
+layout_lyrics_window() {
+  local lyrics_address
+  local floating
+
+  for _ in $(seq 1 25); do
+    lyrics_address="$(window_address_by_title "MusicLyrics")"
+    if [[ -n "$lyrics_address" && "$lyrics_address" != "null" ]]; then
+      floating="$(hyprctl -j clients 2>/dev/null | jq -r --arg addr "$lyrics_address" '.[] | select(.address == $addr) | (.floating | tostring)')"
+      dispatch focuswindow "address:$lyrics_address"
+      if [[ "$floating" != "true" ]]; then
+        dispatch togglefloating
+      fi
+      dispatch resizeactive exact 804 500
+      dispatch moveactive exact 1104 330
+      return
+    fi
+    sleep 0.2
+  done
+}
+
+ensure_control_room_server() {
+  if pgrep -f 'music-control-room-server' >/dev/null 2>&1; then
+    return
+  fi
+
+  setsid ~/.local/bin/music-control-room-server >/tmp/music-control-room.log 2>&1 &
+  sleep 0.2
+}
+
+launch_pulse_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 10 )); then
+    return 1
+  fi
+
+  if ! command -v chromium >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if pulse_is_running; then
+    return 1
+  fi
+
+  ensure_control_room_server
+  setsid uwsm-app -- chromium --app=http://127.0.0.1:8976/ >/dev/null 2>&1 &
+  layout_pulse_window &
+  return 0
+}
+
+launch_lyrics_panel_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 10 )); then
+    return 1
+  fi
+
+  if lyrics_panel_is_running; then
+    return 1
+  fi
+
+  ensure_control_room_server
+  setsid uwsm-app -- chromium --app=http://127.0.0.1:8976/lyrics >/dev/null 2>&1 &
+  layout_lyrics_window &
+  return 0
+}
+
+launch_dashboard_panel_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 10 )); then
+    return 1
+  fi
+
+  if dashboard_panel_is_running; then
+    return 1
+  fi
+
+  setsid uwsm-app -- ghostty --title=MusicDashboard -e ~/.local/bin/music-control-room-status >/dev/null 2>&1 &
   return 0
 }
 
@@ -235,9 +365,21 @@ case "$action" in
     if launch_visualizer_for_workspace "$workspace"; then
       launched_workspace_apps=0
     fi
+    if launch_pulse_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_lyrics_panel_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_dashboard_panel_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
     if (( launched_workspace_apps == 0 )); then
-      sleep 0.3
+      sleep 0.5
       sync_workspace_pair "$workspace"
+      sleep 1.0
+      sync_workspace_pair "$workspace"
+      delayed_sync_workspace_pair "$workspace"
     fi
     ;;
   move)

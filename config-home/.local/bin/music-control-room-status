@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+fmt_time() {
+  local total="${1%.*}"
+  printf '%02d:%02d' "$((total / 60))" "$((total % 60))"
+}
+
+progress_bar() {
+  local value="$1"
+  local max="$2"
+  local width="$3"
+  local filled=0
+
+  if (( max > 0 )); then
+    filled=$(( value * width / max ))
+  fi
+
+  if (( filled > width )); then
+    filled="$width"
+  fi
+
+  local empty=$(( width - filled ))
+  printf '['
+  printf '%0.s=' $(seq 1 "$filled")
+  printf '%0.s.' $(seq 1 "$empty")
+  printf ']'
+}
+
+while true; do
+  clear
+
+  status="$(playerctl -p spotify status 2>/dev/null || true)"
+  if [[ -z "$status" ]]; then
+    cat <<'EOF'
+MUSIC DASHBOARD
+
+Spotify is not active.
+
+Open workspace 0 to start the full music scene.
+EOF
+    sleep 1
+    continue
+  fi
+
+  title="$(playerctl -p spotify metadata xesam:title 2>/dev/null || true)"
+  artist="$(playerctl -p spotify metadata xesam:artist 2>/dev/null || true)"
+  album="$(playerctl -p spotify metadata xesam:album 2>/dev/null || true)"
+  position="$(playerctl -p spotify position 2>/dev/null || echo 0)"
+  length_usec="$(playerctl -p spotify metadata mpris:length 2>/dev/null || echo 0)"
+  volume="$(playerctl -p spotify volume 2>/dev/null || echo 0)"
+
+  length="$(awk "BEGIN { printf \"%d\", ${length_usec:-0} / 1000000 }")"
+  elapsed="$(awk "BEGIN { printf \"%d\", ${position:-0} }")"
+  remaining=$(( length > elapsed ? length - elapsed : 0 ))
+  volume_pct="$(awk "BEGIN { printf \"%d\", (${volume:-0}) * 100 }")"
+  elapsed_bar="$(progress_bar "$elapsed" "${length:-1}" 28)"
+  volume_bar="$(progress_bar "$volume_pct" 100 20)"
+
+  cat <<EOF
+MUSIC DASHBOARD
+
+Track    ${title:-Unknown}
+Artist   ${artist:-Unknown}
+Album    ${album:-Unknown}
+
+State    $status
+Clock    $(fmt_time "$elapsed") / $(fmt_time "$length")
+Left     $(fmt_time "$remaining")
+Volume   ${volume_pct}% $(printf '%s' "$volume_bar")
+Progress $(printf '%s' "$elapsed_bar")
+EOF
+
+  sleep 1
+done
