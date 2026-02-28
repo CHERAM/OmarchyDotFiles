@@ -81,6 +81,10 @@ spotify_is_running() {
   hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "spotify")' >/dev/null
 }
 
+visualizer_is_running() {
+  hyprctl -j clients 2>/dev/null | jq -e '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicVisualizer")' >/dev/null
+}
+
 sync_workspace_pair() {
   local base_workspace="$1"
 
@@ -107,6 +111,25 @@ launch_spotify_for_workspace() {
   fi
 
   setsid uwsm-app -- spotify >/dev/null 2>&1 &
+  return 0
+}
+
+launch_visualizer_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 10 )); then
+    return 1
+  fi
+
+  if ! command -v cava >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if visualizer_is_running; then
+    return 1
+  fi
+
+  setsid uwsm-app -- ghostty --title=MusicVisualizer -e cava >/dev/null 2>&1 &
   return 0
 }
 
@@ -205,7 +228,14 @@ fi
 case "$action" in
   switch)
     sync_workspace_pair "$workspace"
+    launched_workspace_apps=1
     if launch_spotify_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_visualizer_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if (( launched_workspace_apps == 0 )); then
       sleep 0.3
       sync_workspace_pair "$workspace"
     fi
