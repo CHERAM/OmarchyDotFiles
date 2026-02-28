@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+workspace_dir="${CODEX_WORKSPACE_DIR:-$HOME/dotfiles}"
+if [[ ! -d "$workspace_dir" ]]; then
+  workspace_dir="$HOME"
+fi
+
+cd "$workspace_dir"
+exec codex

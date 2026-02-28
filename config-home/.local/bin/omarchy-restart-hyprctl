@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Run reload through the active UWSM-managed Wayland session when available.
+if command -v uwsm >/dev/null 2>&1; then
+  if uwsm app -- hyprctl reload >/dev/null 2>&1; then
+    exit 0
+  fi
+fi
+
+exec hyprctl reload

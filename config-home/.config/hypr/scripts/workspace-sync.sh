@@ -128,6 +128,26 @@ discord_is_running() {
   client_matches '.[] | select(.class | test("^discord$"; "i"))'
 }
 
+research_chat_is_running() {
+  client_matches '.[] | select(.workspace.id == 8 and (.title | test("chatgpt"; "i")))'
+}
+
+move_existing_research_chat_to_workspace() {
+  local address
+
+  address="$(window_address_by_filter '.[] | select(.title | test("chatgpt"; "i"))')"
+  if [[ -z "$address" || "$address" == "null" ]]; then
+    return 1
+  fi
+
+  dispatch movetoworkspacesilent "8,address:${address}"
+  return 0
+}
+
+research_codex_is_running() {
+  client_matches '.[] | select(.class == "com.mitchellh.ghostty" and .title == "ResearchCodex")'
+}
+
 sync_workspace_pair() {
   local base_workspace="$1"
 
@@ -147,9 +167,13 @@ delayed_sync_workspace_pair() {
 
   (
     sleep 2
-    sync_workspace_pair "$base_workspace"
+    if [[ "$(resolve_mirrored_base_workspace)" == "$base_workspace" ]]; then
+      sync_workspace_pair "$base_workspace"
+    fi
     sleep 3
-    sync_workspace_pair "$base_workspace"
+    if [[ "$(resolve_mirrored_base_workspace)" == "$base_workspace" ]]; then
+      sync_workspace_pair "$base_workspace"
+    fi
   ) >/dev/null 2>&1 &
 }
 
@@ -372,6 +396,52 @@ launch_discord_for_workspace() {
   return 0
 }
 
+launch_research_chat_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 8 )); then
+    return 1
+  fi
+
+  if ! command -v omarchy-launch-webapp >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if research_chat_is_running; then
+    return 1
+  fi
+
+  if move_existing_research_chat_to_workspace; then
+    return 0
+  fi
+
+  launch_command_on_workspace 8 'omarchy-launch-webapp "https://chatgpt.com/"'
+  return 0
+}
+
+launch_research_codex_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 8 )); then
+    return 1
+  fi
+
+  if ! command -v ghostty >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if ! command -v codex >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if research_codex_is_running; then
+    return 1
+  fi
+
+  launch_command_on_workspace 108 'uwsm-app -- ghostty --title=ResearchCodex -e ~/.local/bin/research-workspace-codex'
+  return 0
+}
+
 resolve_numbered_workspace() {
   local requested_workspace="$1"
 
@@ -468,6 +538,12 @@ case "$action" in
   switch)
     sync_workspace_pair "$workspace"
     launched_workspace_apps=1
+    if launch_research_chat_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_research_codex_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
     if launch_gmail_for_workspace "$workspace"; then
       launched_workspace_apps=0
     fi
@@ -494,10 +570,14 @@ case "$action" in
     fi
     if (( launched_workspace_apps == 0 )); then
       sleep 0.5
-      sync_workspace_pair "$workspace"
+      if [[ "$(resolve_mirrored_base_workspace)" == "$workspace" ]]; then
+        sync_workspace_pair "$workspace"
+      fi
       sleep 1.0
-      sync_workspace_pair "$workspace"
-      delayed_sync_workspace_pair "$workspace"
+      if [[ "$(resolve_mirrored_base_workspace)" == "$workspace" ]]; then
+        sync_workspace_pair "$workspace"
+        delayed_sync_workspace_pair "$workspace"
+      fi
     fi
     ;;
   move)

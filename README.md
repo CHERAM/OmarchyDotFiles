@@ -71,13 +71,30 @@ Files responsible for that behavior:
 - `config-home/.local/share/music-control-room/lyrics.html`
 - `config-home/.config/cava/config`
 
+## Workspace 8 Research + Codex
+
+Workspace `8` / `108` is customized as a research workspace:
+
+- left monitor workspace `8` launches ChatGPT for research
+- right monitor workspace `108` launches a dedicated Ghostty terminal running `codex`
+- Waybar shows workspace `8` and `108` with the search icon ``
+
+The Codex terminal launcher defaults to `~/dotfiles` and falls back to `$HOME`.
+Set `CODEX_WORKSPACE_DIR` if you want a different starting directory.
+
+Files responsible for that behavior:
+
+- `config-home/.config/hypr/scripts/workspace-sync.sh`
+- `config-home/.config/waybar/config.jsonc`
+- `config-home/.local/bin/research-workspace-codex`
+
 ## Workspace 9 Communications Room
 
 Workspace `9` / `109` is customized as a communications workspace:
 
 - left monitor workspace `9` is the communications anchor workspace
 - right monitor workspace `109` is used for secondary communications apps
-- Waybar shows workspace `9` and `109` with the communications icon `󰍩`
+- Waybar shows workspace `9` and `109` with the communications icon ``
 
 On the first visit to workspace `9`, the workspace sync script can launch:
 
@@ -175,7 +192,7 @@ readlink -f ~/.local/share/music-control-room/index.html
 Reload after Hyprland/Waybar changes:
 
 ```bash
-hyprctl reload
+omarchy-restart-hyprctl
 omarchy-restart-waybar
 ```
 
