@@ -100,6 +100,10 @@ spotify_is_running() {
   client_matches '.[] | select(.class == "spotify")'
 }
 
+horizon_client_is_running() {
+  client_matches '.[] | select(.class == "Horizon-client")'
+}
+
 visualizer_is_running() {
   client_matches '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicVisualizer")'
 }
@@ -189,6 +193,25 @@ launch_spotify_for_workspace() {
   fi
 
   setsid uwsm-app -- spotify >/dev/null 2>&1 &
+  return 0
+}
+
+launch_horizon_client_for_workspace() {
+  local requested_workspace="$1"
+
+  if (( requested_workspace != 7 )); then
+    return 1
+  fi
+
+  if ! command -v horizon-client-omarchy >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if horizon_client_is_running; then
+    return 1
+  fi
+
+  setsid uwsm-app -- horizon-client-omarchy --allmonitors --desktopSize=all >/dev/null 2>&1 &
   return 0
 }
 
@@ -551,6 +574,9 @@ case "$action" in
       launched_workspace_apps=0
     fi
     if launch_discord_for_workspace "$workspace"; then
+      launched_workspace_apps=0
+    fi
+    if launch_horizon_client_for_workspace "$workspace"; then
       launched_workspace_apps=0
     fi
     if launch_spotify_for_workspace "$workspace"; then
