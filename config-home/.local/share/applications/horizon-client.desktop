@@ -1,0 +1,23 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Icon=horizon-client
+Exec=/home/che/.local/bin/horizon-client-omarchy --desktopSize=full %u
+MimeType=x-scheme-handler/horizon-client;x-scheme-handler/vmware-view;
+Categories=Application;Network;
+Actions=about-window;single-monitor;all-monitors;
+Name=Omnissa Horizon Client
+Comment=Connect to Omnissa Horizon View virtual machines
+StartupWMClass=Horizon-client
+
+[Desktop Action about-window]
+Name=About
+Exec=/home/che/.local/bin/horizon-client-omarchy --about --useExisting
+
+[Desktop Action single-monitor]
+Name=Launch on one monitor
+Exec=/home/che/.local/bin/horizon-client-omarchy --desktopSize=full
+
+[Desktop Action all-monitors]
+Name=Launch on all monitors
+Exec=/home/che/.local/bin/horizon-client-omarchy --allmonitors --desktopSize=all

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Omarchy/Hyprland wrapper for Horizon Client.
+# Remove desktop scaling overrides that distort the client UI and remote view.
+
+set -euo pipefail
+
+unset GDK_SCALE
+unset GDK_DPI_SCALE
+unset GTK_SCALE
+unset GTK_DPI_SCALE
+unset QT_SCALE_FACTOR
+unset QT_AUTO_SCREEN_SCALE_FACTOR
+
+exec /usr/bin/horizon-client "$@"
