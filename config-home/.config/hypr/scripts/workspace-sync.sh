@@ -81,14 +81,44 @@ dispatch_exec() {
   hyprctl dispatch exec "$1" >/dev/null
 }
 
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/music-control-room"
+pulse_pidfile="${state_dir}/pulse.pid"
+lyrics_pidfile="${state_dir}/lyrics.pid"
+dashboard_pidfile="${state_dir}/dashboard.pid"
+
+ensure_state_dir() {
+  mkdir -p "$state_dir"
+}
+
 window_address_by_title() {
   local title="$1"
   hyprctl -j clients 2>/dev/null | jq -r --arg title "$title" '.[] | select(.title == $title) | .address' | head -n1
 }
 
+window_address_by_pid() {
+  local pid="$1"
+  hyprctl -j clients 2>/dev/null | jq -r --argjson pid "$pid" '.[] | select(.pid == $pid) | .address' | head -n1
+}
+
 window_address_by_filter() {
   local jq_filter="$1"
   hyprctl -j clients 2>/dev/null | jq -r "$jq_filter | .address" | head -n1
+}
+
+window_address_by_pid_or_filter() {
+  local pid="${1:-}"
+  local jq_filter="$2"
+  local address=""
+
+  if [[ "$pid" =~ ^[0-9]+$ ]]; then
+    address="$(window_address_by_pid "$pid")"
+  fi
+
+  if [[ -z "$address" || "$address" == "null" ]]; then
+    address="$(window_address_by_filter "$jq_filter")"
+  fi
+
+  printf '%s\n' "$address"
 }
 
 client_matches() {
@@ -109,14 +139,50 @@ visualizer_is_running() {
 }
 
 pulse_is_running() {
+  local pid address
+
+  if [[ -f "$pulse_pidfile" ]]; then
+    pid="$(<"$pulse_pidfile")"
+    if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" >/dev/null 2>&1; then
+      address="$(window_address_by_pid "$pid")"
+      if [[ -n "$address" && "$address" != "null" ]]; then
+        return 0
+      fi
+    fi
+  fi
+
   client_matches '.[] | select(.title == "MusicPulse")'
 }
 
 lyrics_panel_is_running() {
+  local pid address
+
+  if [[ -f "$lyrics_pidfile" ]]; then
+    pid="$(<"$lyrics_pidfile")"
+    if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" >/dev/null 2>&1; then
+      address="$(window_address_by_pid "$pid")"
+      if [[ -n "$address" && "$address" != "null" ]]; then
+        return 0
+      fi
+    fi
+  fi
+
   client_matches '.[] | select(.title == "MusicLyrics")'
 }
 
 dashboard_panel_is_running() {
+  local pid address
+
+  if [[ -f "$dashboard_pidfile" ]]; then
+    pid="$(<"$dashboard_pidfile")"
+    if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" >/dev/null 2>&1; then
+      address="$(window_address_by_pid "$pid")"
+      if [[ -n "$address" && "$address" != "null" ]]; then
+        return 0
+      fi
+    fi
+  fi
+
   client_matches '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicDashboard")'
 }
 
@@ -235,13 +301,15 @@ launch_visualizer_for_workspace() {
 }
 
 layout_pulse_window() {
+  local pulse_pid="$1"
   local pulse_address
   local floating
 
-  for _ in $(seq 1 25); do
-    pulse_address="$(window_address_by_title "MusicPulse")"
+  for _ in $(seq 1 60); do
+    pulse_address="$(window_address_by_pid_or_filter "$pulse_pid" '.[] | select(.title == "MusicPulse")')"
     if [[ -n "$pulse_address" && "$pulse_address" != "null" ]]; then
       floating="$(hyprctl -j clients 2>/dev/null | jq -r --arg addr "$pulse_address" '.[] | select(.address == $addr) | (.floating | tostring)')"
+      dispatch movetoworkspacesilent "10,address:${pulse_address}"
       dispatch focuswindow "address:$pulse_address"
       if [[ "$floating" != "true" ]]; then
         dispatch togglefloating
@@ -250,18 +318,20 @@ layout_pulse_window() {
       dispatch moveactive exact 1104 38
       return
     fi
-    sleep 0.2
+    sleep 0.25
   done
 }
 
 layout_lyrics_window() {
+  local lyrics_pid="$1"
   local lyrics_address
   local floating
 
-  for _ in $(seq 1 25); do
-    lyrics_address="$(window_address_by_title "MusicLyrics")"
+  for _ in $(seq 1 60); do
+    lyrics_address="$(window_address_by_pid_or_filter "$lyrics_pid" '.[] | select(.title == "MusicLyrics")')"
     if [[ -n "$lyrics_address" && "$lyrics_address" != "null" ]]; then
       floating="$(hyprctl -j clients 2>/dev/null | jq -r --arg addr "$lyrics_address" '.[] | select(.address == $addr) | (.floating | tostring)')"
+      dispatch movetoworkspacesilent "10,address:${lyrics_address}"
       dispatch focuswindow "address:$lyrics_address"
       if [[ "$floating" != "true" ]]; then
         dispatch togglefloating
@@ -270,8 +340,51 @@ layout_lyrics_window() {
       dispatch moveactive exact 1104 330
       return
     fi
-    sleep 0.2
+    sleep 0.25
   done
+}
+
+layout_dashboard_window() {
+  local dashboard_pid="$1"
+  local dashboard_address
+  local floating
+
+  for _ in $(seq 1 60); do
+    dashboard_address="$(window_address_by_pid_or_filter "$dashboard_pid" '.[] | select(.class == "com.mitchellh.ghostty" and .title == "MusicDashboard")')"
+    if [[ -n "$dashboard_address" && "$dashboard_address" != "null" ]]; then
+      floating="$(hyprctl -j clients 2>/dev/null | jq -r --arg addr "$dashboard_address" '.[] | select(.address == $addr) | (.floating | tostring)')"
+      dispatch movetoworkspacesilent "10,address:${dashboard_address}"
+      dispatch focuswindow "address:$dashboard_address"
+      if [[ "$floating" != "true" ]]; then
+        dispatch togglefloating
+      fi
+      dispatch resizeactive exact 804 226
+      dispatch moveactive exact 1104 842
+      return
+    fi
+    sleep 0.25
+  done
+}
+
+reconcile_music_workspace() {
+  local pulse_pid=""
+  local lyrics_pid=""
+  local dashboard_pid=""
+
+  if [[ -f "$pulse_pidfile" ]]; then
+    pulse_pid="$(<"$pulse_pidfile")"
+  fi
+  if [[ -f "$lyrics_pidfile" ]]; then
+    lyrics_pid="$(<"$lyrics_pidfile")"
+  fi
+  if [[ -f "$dashboard_pidfile" ]]; then
+    dashboard_pid="$(<"$dashboard_pidfile")"
+  fi
+
+  layout_pulse_window "$pulse_pid" &
+  layout_lyrics_window "$lyrics_pid" &
+  layout_dashboard_window "$dashboard_pid" &
+  wait
 }
 
 ensure_control_room_server() {
@@ -284,6 +397,8 @@ ensure_control_room_server() {
 }
 
 launch_pulse_for_workspace() {
+  local pulse_pid
+
   local requested_workspace="$1"
 
   if (( requested_workspace != 10 )); then
@@ -299,12 +414,17 @@ launch_pulse_for_workspace() {
   fi
 
   ensure_control_room_server
-  setsid uwsm-app -- chromium --app=http://127.0.0.1:8976/ >/dev/null 2>&1 &
-  layout_pulse_window &
+  ensure_state_dir
+  setsid uwsm-app -- ~/.local/bin/music-control-room-web-pulse >/dev/null 2>&1 &
+  pulse_pid=$!
+  printf '%s\n' "$pulse_pid" >"$pulse_pidfile"
+  layout_pulse_window "$pulse_pid" &
   return 0
 }
 
 launch_lyrics_panel_for_workspace() {
+  local lyrics_pid
+
   local requested_workspace="$1"
 
   if (( requested_workspace != 10 )); then
@@ -316,12 +436,16 @@ launch_lyrics_panel_for_workspace() {
   fi
 
   ensure_control_room_server
-  setsid uwsm-app -- chromium --app=http://127.0.0.1:8976/lyrics >/dev/null 2>&1 &
-  layout_lyrics_window &
+  ensure_state_dir
+  setsid uwsm-app -- ~/.local/bin/music-control-room-web-lyrics >/dev/null 2>&1 &
+  lyrics_pid=$!
+  printf '%s\n' "$lyrics_pid" >"$lyrics_pidfile"
+  layout_lyrics_window "$lyrics_pid" &
   return 0
 }
 
 launch_dashboard_panel_for_workspace() {
+  local dashboard_pid
   local requested_workspace="$1"
 
   if (( requested_workspace != 10 )); then
@@ -332,7 +456,11 @@ launch_dashboard_panel_for_workspace() {
     return 1
   fi
 
+  ensure_state_dir
   setsid uwsm-app -- ghostty --title=MusicDashboard -e ~/.local/bin/music-control-room-status >/dev/null 2>&1 &
+  dashboard_pid=$!
+  printf '%s\n' "$dashboard_pid" >"$dashboard_pidfile"
+  layout_dashboard_window "$dashboard_pid" &
   return 0
 }
 
@@ -595,6 +723,7 @@ case "$action" in
       launched_workspace_apps=0
     fi
     if (( launched_workspace_apps == 0 )); then
+      reconcile_music_workspace >/dev/null 2>&1 &
       sleep 0.5
       if [[ "$(resolve_mirrored_base_workspace)" == "$workspace" ]]; then
         sync_workspace_pair "$workspace"
@@ -603,6 +732,7 @@ case "$action" in
       if [[ "$(resolve_mirrored_base_workspace)" == "$workspace" ]]; then
         sync_workspace_pair "$workspace"
         delayed_sync_workspace_pair "$workspace"
+        reconcile_music_workspace >/dev/null 2>&1 &
       fi
     fi
     ;;

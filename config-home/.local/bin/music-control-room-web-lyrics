@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/music-control-room"
+profile_dir="${state_dir}/chromium-lyrics-profile"
+
+mkdir -p "$profile_dir"
+
+exec chromium \
+  --user-data-dir="$profile_dir" \
+  --app="http://127.0.0.1:8976/lyrics" \
+  "$@"
