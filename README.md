@@ -200,5 +200,6 @@ omarchy-restart-waybar
 
 - Omarchy defaults live under `~/.local/share/omarchy/default/`
 - this repo is for local overrides only
+- tmux split bindings are customized in `config-home/.config/tmux/tmux.conf`: `|` for horizontal split and `-` for vertical split
 - custom launcher overrides can live in `~/.local/bin/`; bind them explicitly if Omarchy's bin appears earlier in `PATH`
 - avoid tracking large app-state folders like Chromium or VS Code backups
