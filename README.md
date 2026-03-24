@@ -196,6 +196,32 @@ omarchy-restart-hyprctl
 omarchy-restart-waybar
 ```
 
+## Neovim (LazyVim)
+
+Config lives at `config-home/.config/nvim/` and is based on [omerxx/dotfiles](https://github.com/omerxx/dotfiles).
+
+After cloning and running `stow config-home`, `~/.config/nvim` will be symlinked automatically.
+On first launch, lazy.nvim will bootstrap and install all plugins:
+
+```bash
+nvim
+```
+
+To back up an existing nvim config before applying:
+
+```bash
+cp -r ~/.config/nvim ~/.config/nvim.bak
+```
+
+To update the lockfile after plugin changes, commit `lazy-lock.json`:
+
+```bash
+cd ~/dotfiles
+git add config-home/.config/nvim/lazy-lock.json
+git commit -m "nvim: update lazy-lock"
+git push
+```
+
 ## Notes
 
 - Omarchy defaults live under `~/.local/share/omarchy/default/`
