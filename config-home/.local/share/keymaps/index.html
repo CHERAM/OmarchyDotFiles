@@ -246,6 +246,7 @@
 <nav>
   <button class="tab-btn active" data-tab="hyprland">Hyprland</button>
   <button class="tab-btn" data-tab="neovim">Neovim</button>
+  <button class="tab-btn" data-tab="vimmotions">Vim Motions</button>
   <button class="tab-btn" data-tab="tmux">Tmux</button>
   <button class="tab-btn" data-tab="yazi">Yazi</button>
   <button class="tab-btn" data-tab="quick">Quick Reference</button>
@@ -525,19 +526,238 @@
 
 </div>
 
+<!-- VIM MOTIONS TAB -->
+<div class="tab-panel" id="tab-vimmotions">
+
+  <div class="leader-note">
+    <strong>Counts work everywhere:</strong> prefix any motion with a number — <kbd>3w</kbd> moves 3 words, <kbd>5j</kbd> moves 5 lines down, <kbd>d2w</kbd> deletes 2 words. &nbsp;|&nbsp;
+    <strong>Operators + motions = actions:</strong> <kbd>d</kbd><kbd>motion</kbd> delete · <kbd>c</kbd><kbd>motion</kbd> change · <kbd>y</kbd><kbd>motion</kbd> yank · <kbd>v</kbd><kbd>motion</kbd> select
+  </div>
+
+  <div class="section">
+    <div class="section-title">Basic Movement</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="h j k l left down up right"><div class="keys"><kbd>h</kbd><span class="sep">/</span><kbd>j</kbd><span class="sep">/</span><kbd>k</kbd><span class="sep">/</span><kbd>l</kbd></div><div class="desc">Left / Down / Up / Right</div></div>
+      <div class="keymap-row" data-keys="w W next word forward"><div class="keys"><kbd>w</kbd><span class="sep">/</span><kbd>W</kbd></div><div class="desc">Next word start <em>(w=word, W=WORD)</em></div></div>
+      <div class="keymap-row" data-keys="b B prev word back"><div class="keys"><kbd>b</kbd><span class="sep">/</span><kbd>B</kbd></div><div class="desc">Previous word start</div></div>
+      <div class="keymap-row" data-keys="e E end word"><div class="keys"><kbd>e</kbd><span class="sep">/</span><kbd>E</kbd></div><div class="desc">Word end</div></div>
+      <div class="keymap-row" data-keys="ge gE prev word end"><div class="keys"><kbd>ge</kbd><span class="sep">/</span><kbd>gE</kbd></div><div class="desc">Previous word end</div></div>
+      <div class="keymap-row" data-keys="0 ^ start of line"><div class="keys"><kbd>0</kbd><span class="sep">/</span><kbd>^</kbd></div><div class="desc">Line start <em>(0=col 0, ^=first non-blank)</em></div></div>
+      <div class="keymap-row" data-keys="$ end of line"><div class="keys"><kbd>$</kbd></div><div class="desc">Line end</div></div>
+      <div class="keymap-row" data-keys="g_ last non-blank end line"><div class="keys"><kbd>g_</kbd></div><div class="desc">Last non-blank character of line</div></div>
+      <div class="keymap-row" data-keys="gg go to first line top file"><div class="keys"><kbd>gg</kbd></div><div class="desc">First line of file</div></div>
+      <div class="keymap-row" data-keys="G go to last line bottom file"><div class="keys"><kbd>G</kbd></div><div class="desc">Last line of file</div></div>
+      <div class="keymap-row" data-keys="50G 50gg go to line number"><div class="keys"><kbd>50G</kbd><span class="sep">/</span><kbd>:50</kbd></div><div class="desc">Go to line 50</div></div>
+      <div class="keymap-row" data-keys="{ } paragraph prev next"><div class="keys"><kbd>{</kbd><span class="sep">/</span><kbd>}</kbd></div><div class="desc">Previous / next empty line (paragraph)</div></div>
+      <div class="keymap-row" data-keys="( ) sentence prev next"><div class="keys"><kbd>(</kbd><span class="sep">/</span><kbd>)</kbd></div><div class="desc">Previous / next sentence</div></div>
+      <div class="keymap-row" data-keys="% matching bracket paren brace"><div class="keys"><kbd>%</kbd></div><div class="desc">Jump to matching bracket / paren / brace</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Screen &amp; Jump Movement</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Ctrl d u half page scroll"><div class="keys"><kbd>Ctrl+d</kbd><span class="sep">/</span><kbd>Ctrl+u</kbd></div><div class="desc">Half page down / up</div></div>
+      <div class="keymap-row" data-keys="Ctrl f b full page scroll"><div class="keys"><kbd>Ctrl+f</kbd><span class="sep">/</span><kbd>Ctrl+b</kbd></div><div class="desc">Full page down / up</div></div>
+      <div class="keymap-row" data-keys="H M L screen top middle bottom"><div class="keys"><kbd>H</kbd><span class="sep">/</span><kbd>M</kbd><span class="sep">/</span><kbd>L</kbd></div><div class="desc">Screen top / middle / bottom</div></div>
+      <div class="keymap-row" data-keys="zz zt zb center top bottom cursor screen"><div class="keys"><kbd>zz</kbd><span class="sep">/</span><kbd>zt</kbd><span class="sep">/</span><kbd>zb</kbd></div><div class="desc">Center / top / bottom cursor on screen</div></div>
+      <div class="keymap-row" data-keys="Ctrl o i jump back forward list"><div class="keys"><kbd>Ctrl+o</kbd><span class="sep">/</span><kbd>Ctrl+i</kbd></div><div class="desc">Jump back / forward in jump list</div></div>
+      <div class="keymap-row" data-keys="'' backtick previous jump mark"><div class="keys"><kbd>''</kbd></div><div class="desc">Jump back to previous position</div></div>
+      <div class="keymap-row" data-keys="ma mark set register"><div class="keys"><kbd>m</kbd><kbd>a</kbd></div><div class="desc">Set mark <kbd>a</kbd> at cursor <em>(a–z local, A–Z global)</em></div></div>
+      <div class="keymap-row" data-keys="'a `a go to mark jump"><div class="keys"><kbd>'a</kbd><span class="sep">/</span><kbd>`a</kbd></div><div class="desc">Jump to mark a <em>('=line start, `=exact col)</em></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Find on Line (f / t)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="f char find forward line"><div class="keys"><kbd>f</kbd><kbd>x</kbd></div><div class="desc">Jump to next <kbd>x</kbd> on line <em>(inclusive)</em></div></div>
+      <div class="keymap-row" data-keys="F char find backward line"><div class="keys"><kbd>F</kbd><kbd>x</kbd></div><div class="desc">Jump to previous <kbd>x</kbd> on line</div></div>
+      <div class="keymap-row" data-keys="t char till forward line"><div class="keys"><kbd>t</kbd><kbd>x</kbd></div><div class="desc">Jump before next <kbd>x</kbd> on line <em>(exclusive)</em></div></div>
+      <div class="keymap-row" data-keys="T char till backward line"><div class="keys"><kbd>T</kbd><kbd>x</kbd></div><div class="desc">Jump after previous <kbd>x</kbd> on line</div></div>
+      <div class="keymap-row" data-keys="; , repeat f t forward back"><div class="keys"><kbd>;</kbd><span class="sep">/</span><kbd>,</kbd></div><div class="desc">Repeat f/t forward / backward</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Search</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="/ search forward pattern"><div class="keys"><kbd>/pattern</kbd></div><div class="desc">Search forward</div></div>
+      <div class="keymap-row" data-keys="? search backward pattern"><div class="keys"><kbd>?pattern</kbd></div><div class="desc">Search backward</div></div>
+      <div class="keymap-row" data-keys="n N next prev search result"><div class="keys"><kbd>n</kbd><span class="sep">/</span><kbd>N</kbd></div><div class="desc">Next / previous match</div></div>
+      <div class="keymap-row" data-keys="* # search word under cursor"><div class="keys"><kbd>*</kbd><span class="sep">/</span><kbd>#</kbd></div><div class="desc">Search word under cursor forward / backward</div></div>
+      <div class="keymap-row" data-keys="g* g# search partial word cursor"><div class="keys"><kbd>g*</kbd><span class="sep">/</span><kbd>g#</kbd></div><div class="desc">Same but partial match (no word boundary)</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Flash.nvim — Enhanced Jumps</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="s flash jump anywhere labels"><div class="keys"><kbd>s</kbd></div><div class="desc">Flash jump — type chars, pick label to teleport anywhere</div></div>
+      <div class="keymap-row" data-keys="S flash treesitter select node"><div class="keys"><kbd>S</kbd></div><div class="desc">Flash treesitter — select any syntax node</div></div>
+      <div class="keymap-row" data-keys="r flash remote operator"><div class="keys"><kbd>r</kbd></div><div class="desc">Remote flash — run operator on any location <em>(in operator pending)</em></div></div>
+      <div class="keymap-row" data-keys="R flash treesitter search remote"><div class="keys"><kbd>R</kbd></div><div class="desc">Remote treesitter — select from any location</div></div>
+      <div class="keymap-row" data-keys="Ctrl s flash toggle search"><div class="keys"><kbd>Ctrl+s</kbd></div><div class="desc">Toggle flash search labels <em>(while in / search)</em></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Operators (combine with motions / text objects)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="d delete motion text object"><div class="keys"><kbd>d</kbd><kbd>motion</kbd></div><div class="desc">Delete <em>(e.g. dw, d$, dap)</em></div></div>
+      <div class="keymap-row" data-keys="dd delete line"><div class="keys"><kbd>dd</kbd></div><div class="desc">Delete whole line</div></div>
+      <div class="keymap-row" data-keys="D delete to end of line"><div class="keys"><kbd>D</kbd></div><div class="desc">Delete to end of line</div></div>
+      <div class="keymap-row" data-keys="c change motion text object"><div class="keys"><kbd>c</kbd><kbd>motion</kbd></div><div class="desc">Change (delete + insert) <em>(e.g. cw, ci", cap)</em></div></div>
+      <div class="keymap-row" data-keys="cc change line"><div class="keys"><kbd>cc</kbd></div><div class="desc">Change whole line</div></div>
+      <div class="keymap-row" data-keys="C change to end of line"><div class="keys"><kbd>C</kbd></div><div class="desc">Change to end of line</div></div>
+      <div class="keymap-row" data-keys="y yank copy motion text object"><div class="keys"><kbd>y</kbd><kbd>motion</kbd></div><div class="desc">Yank (copy) <em>(e.g. yw, yy, yap)</em></div></div>
+      <div class="keymap-row" data-keys="yy Y yank line copy"><div class="keys"><kbd>yy</kbd><span class="sep">/</span><kbd>Y</kbd></div><div class="desc">Yank whole line</div></div>
+      <div class="keymap-row" data-keys="= indent auto format motion"><div class="keys"><kbd>=</kbd><kbd>motion</kbd></div><div class="desc">Auto-indent <em>(e.g. gg=G to indent whole file)</em></div></div>
+      <div class="keymap-row" data-keys="> < indent dedent motion"><div class="keys"><kbd>&gt;</kbd><span class="sep">/</span><kbd>&lt;</kbd><kbd>motion</kbd></div><div class="desc">Indent / dedent</div></div>
+      <div class="keymap-row" data-keys="gu gU lowercase uppercase motion"><div class="keys"><kbd>gu</kbd><span class="sep">/</span><kbd>gU</kbd><kbd>motion</kbd></div><div class="desc">Lowercase / uppercase</div></div>
+      <div class="keymap-row" data-keys="~ tilde toggle case char"><div class="keys"><kbd>~</kbd></div><div class="desc">Toggle case of character under cursor</div></div>
+      <div class="keymap-row" data-keys="g~ toggle case motion"><div class="keys"><kbd>g~</kbd><kbd>motion</kbd></div><div class="desc">Toggle case over motion</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Text Objects (use after d / c / y / v)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="iw aw inner around word"><div class="keys"><kbd>iw</kbd><span class="sep">/</span><kbd>aw</kbd></div><div class="desc">Inner word / around word <em>(aw includes space)</em></div></div>
+      <div class="keymap-row" data-keys="iW aW inner around WORD"><div class="keys"><kbd>iW</kbd><span class="sep">/</span><kbd>aW</kbd></div><div class="desc">Inner WORD / around WORD</div></div>
+      <div class="keymap-row" data-keys="is as inner around sentence"><div class="keys"><kbd>is</kbd><span class="sep">/</span><kbd>as</kbd></div><div class="desc">Inner sentence / around sentence</div></div>
+      <div class="keymap-row" data-keys="ip ap inner around paragraph"><div class="keys"><kbd>ip</kbd><span class="sep">/</span><kbd>ap</kbd></div><div class="desc">Inner paragraph / around paragraph</div></div>
+      <div class="keymap-row" data-keys="i( a( i) a) inner around paren parenthesis"><div class="keys"><kbd>i(</kbd><span class="sep">/</span><kbd>a(</kbd></div><div class="desc">Inner / around parentheses <em>( )</em></div></div>
+      <div class="keymap-row" data-keys="i[ a[ inner around bracket square"><div class="keys"><kbd>i[</kbd><span class="sep">/</span><kbd>a[</kbd></div><div class="desc">Inner / around square brackets <em>[ ]</em></div></div>
+      <div class="keymap-row" data-keys="i{ a{ ib ab inner around brace curly"><div class="keys"><kbd>i{</kbd><span class="sep">/</span><kbd>a{</kbd></div><div class="desc">Inner / around curly braces <em>{ }</em></div></div>
+      <div class="keymap-row" data-keys="i< a< inner around angle bracket tag"><div class="keys"><kbd>i&lt;</kbd><span class="sep">/</span><kbd>a&lt;</kbd></div><div class="desc">Inner / around angle brackets <em>&lt; &gt;</em></div></div>
+      <div class="keymap-row" data-keys='i" a" inner around double quote string'><div class="keys"><kbd>i"</kbd><span class="sep">/</span><kbd>a"</kbd></div><div class="desc">Inner / around double quotes</div></div>
+      <div class="keymap-row" data-keys="i' a' inner around single quote string"><div class="keys"><kbd>i'</kbd><span class="sep">/</span><kbd>a'</kbd></div><div class="desc">Inner / around single quotes</div></div>
+      <div class="keymap-row" data-keys="i` a` inner around backtick quote"><div class="keys"><kbd>i`</kbd><span class="sep">/</span><kbd>a`</kbd></div><div class="desc">Inner / around backticks</div></div>
+      <div class="keymap-row" data-keys="it at inner around tag html xml"><div class="keys"><kbd>it</kbd><span class="sep">/</span><kbd>at</kbd></div><div class="desc">Inner / around HTML/XML tag</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">mini.ai — Extended Text Objects</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="ia aa inner around argument function call mini.ai"><div class="keys"><kbd>ia</kbd><span class="sep">/</span><kbd>aa</kbd></div><div class="desc">Inner / around function argument</div></div>
+      <div class="keymap-row" data-keys="if af inner around function definition mini.ai"><div class="keys"><kbd>if</kbd><span class="sep">/</span><kbd>af</kbd></div><div class="desc">Inner / around function body</div></div>
+      <div class="keymap-row" data-keys="ic ac inner around class mini.ai"><div class="keys"><kbd>ic</kbd><span class="sep">/</span><kbd>ac</kbd></div><div class="desc">Inner / around class</div></div>
+      <div class="keymap-row" data-keys="il al inner around line mini.ai"><div class="keys"><kbd>il</kbd><span class="sep">/</span><kbd>al</kbd></div><div class="desc">Inner / around line</div></div>
+      <div class="keymap-row" data-keys="id ad inner around digit number mini.ai"><div class="keys"><kbd>id</kbd><span class="sep">/</span><kbd>ad</kbd></div><div class="desc">Inner / around digit sequence (number)</div></div>
+      <div class="keymap-row" data-keys="io ao inner around block scope indent mini.ai"><div class="keys"><kbd>io</kbd><span class="sep">/</span><kbd>ao</kbd></div><div class="desc">Inner / around indented block</div></div>
+      <div class="keymap-row" data-keys="[ ] next prev text object repeat mini.ai"><div class="keys"><kbd>]</kbd><span class="sep">/</span><kbd>[</kbd><kbd>prefix</kbd></div><div class="desc">Next / prev occurrence of text object <em>(e.g. ]a next arg)</em></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">mini.surround — Surround Operations</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="sa add surround bracket quote"><div class="keys"><kbd>sa</kbd><kbd>motion</kbd><kbd>char</kbd></div><div class="desc">Add surround <em>(e.g. saW" wraps WORD in quotes, saiw( wraps word in parens)</em></div></div>
+      <div class="keymap-row" data-keys="sd delete surround remove bracket quote"><div class="keys"><kbd>sd</kbd><kbd>char</kbd></div><div class="desc">Delete surround <em>(e.g. sd" removes surrounding quotes)</em></div></div>
+      <div class="keymap-row" data-keys="gsr sr replace surround change bracket quote"><div class="keys"><kbd>gsr</kbd><kbd>old</kbd><kbd>new</kbd></div><div class="desc">Replace surround <em>(e.g. gsr"' changes " to ')</em></div></div>
+      <div class="keymap-row" data-keys="gsf gsF find surrounding highlight"><div class="keys"><kbd>gsf</kbd><span class="sep">/</span><kbd>gsF</kbd></div><div class="desc">Find surrounding next / prev</div></div>
+      <div class="keymap-row" data-keys="gsh highlight surrounding"><div class="keys"><kbd>gsh</kbd></div><div class="desc">Highlight surrounding</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Insert Mode Editing</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="i insert before cursor"><div class="keys"><kbd>i</kbd></div><div class="desc">Insert before cursor</div></div>
+      <div class="keymap-row" data-keys="I insert start of line"><div class="keys"><kbd>I</kbd></div><div class="desc">Insert at line start (first non-blank)</div></div>
+      <div class="keymap-row" data-keys="a append after cursor insert"><div class="keys"><kbd>a</kbd></div><div class="desc">Append after cursor</div></div>
+      <div class="keymap-row" data-keys="A append end of line insert"><div class="keys"><kbd>A</kbd></div><div class="desc">Append at end of line</div></div>
+      <div class="keymap-row" data-keys="o open new line below insert"><div class="keys"><kbd>o</kbd></div><div class="desc">Open new line below and insert</div></div>
+      <div class="keymap-row" data-keys="O open new line above insert"><div class="keys"><kbd>O</kbd></div><div class="desc">Open new line above and insert</div></div>
+      <div class="keymap-row" data-keys="s substitute char delete insert"><div class="keys"><kbd>s</kbd></div><div class="desc">Delete char under cursor and insert</div></div>
+      <div class="keymap-row" data-keys="S substitute line delete insert"><div class="keys"><kbd>S</kbd></div><div class="desc">Delete line and insert</div></div>
+      <div class="keymap-row" data-keys="Ctrl w delete word back insert mode"><div class="keys"><kbd>Ctrl+w</kbd></div><div class="desc">Delete word before cursor <em>(in insert mode)</em></div></div>
+      <div class="keymap-row" data-keys="Ctrl u delete to start of line insert mode"><div class="keys"><kbd>Ctrl+u</kbd></div><div class="desc">Delete to start of line <em>(in insert mode)</em></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Editing Shortcuts</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="x delete char under cursor"><div class="keys"><kbd>x</kbd></div><div class="desc">Delete char under cursor</div></div>
+      <div class="keymap-row" data-keys="X delete char before cursor backspace"><div class="keys"><kbd>X</kbd></div><div class="desc">Delete char before cursor</div></div>
+      <div class="keymap-row" data-keys="r replace char single"><div class="keys"><kbd>r</kbd><kbd>x</kbd></div><div class="desc">Replace char under cursor with <kbd>x</kbd></div></div>
+      <div class="keymap-row" data-keys="R replace mode overwrite"><div class="keys"><kbd>R</kbd></div><div class="desc">Enter replace mode (overwrite)</div></div>
+      <div class="keymap-row" data-keys="p P paste after before"><div class="keys"><kbd>p</kbd><span class="sep">/</span><kbd>P</kbd></div><div class="desc">Paste after / before cursor</div></div>
+      <div class="keymap-row" data-keys=". repeat last change"><div class="keys"><kbd>.</kbd></div><div class="desc">Repeat last change <em>(most powerful shortcut)</em></div></div>
+      <div class="keymap-row" data-keys="u Ctrl r undo redo"><div class="keys"><kbd>u</kbd><span class="sep">/</span><kbd>Ctrl+r</kbd></div><div class="desc">Undo / redo</div></div>
+      <div class="keymap-row" data-keys="J join lines merge"><div class="keys"><kbd>J</kbd></div><div class="desc">Join line below to current line</div></div>
+      <div class="keymap-row" data-keys="gJ join lines no space"><div class="keys"><kbd>gJ</kbd></div><div class="desc">Join lines without adding space</div></div>
+      <div class="keymap-row" data-keys="Ctrl a increment number"><div class="keys"><kbd>Ctrl+a</kbd></div><div class="desc">Increment number under cursor</div></div>
+      <div class="keymap-row" data-keys="Ctrl x decrement number"><div class="keys"><kbd>Ctrl+x</kbd></div><div class="desc">Decrement number under cursor</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Visual Mode</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="v visual char select"><div class="keys"><kbd>v</kbd></div><div class="desc">Visual (char) mode</div></div>
+      <div class="keymap-row" data-keys="V visual line select"><div class="keys"><kbd>V</kbd></div><div class="desc">Visual line mode</div></div>
+      <div class="keymap-row" data-keys="Ctrl v visual block column select"><div class="keys"><kbd>Ctrl+v</kbd></div><div class="desc">Visual block mode <em>(column select)</em></div></div>
+      <div class="keymap-row" data-keys="gv reselect last visual selection"><div class="keys"><kbd>gv</kbd></div><div class="desc">Re-select last visual selection</div></div>
+      <div class="keymap-row" data-keys="o O swap visual ends selection"><div class="keys"><kbd>o</kbd><span class="sep">/</span><kbd>O</kbd></div><div class="desc">Move to other end of selection</div></div>
+      <div class="keymap-row" data-keys="> < indent dedent visual selected"><div class="keys"><kbd>&gt;</kbd><span class="sep">/</span><kbd>&lt;</kbd></div><div class="desc">Indent / dedent selection</div></div>
+      <div class="keymap-row" data-keys="u U lowercase uppercase visual selected"><div class="keys"><kbd>u</kbd><span class="sep">/</span><kbd>U</kbd></div><div class="desc">Lowercase / uppercase selection</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Registers &amp; Macros</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="&quot;a register yank paste named"><div class="keys"><kbd>"</kbd><kbd>a</kbd><kbd>y</kbd></div><div class="desc">Yank into register <kbd>a</kbd> <em>("ay / "ap etc)</em></div></div>
+      <div class="keymap-row" data-keys="&quot;+ system clipboard yank paste"><div class="keys"><kbd>"+</kbd><kbd>y</kbd><span class="sep">/</span><kbd>"+</kbd><kbd>p</kbd></div><div class="desc">Yank to / paste from system clipboard</div></div>
+      <div class="keymap-row" data-keys=":reg registers list view"><div class="keys"><kbd>:reg</kbd></div><div class="desc">Show all registers</div></div>
+      <div class="keymap-row" data-keys="qa macro record start"><div class="keys"><kbd>q</kbd><kbd>a</kbd></div><div class="desc">Start recording macro into register <kbd>a</kbd></div></div>
+      <div class="keymap-row" data-keys="q stop macro record end"><div class="keys"><kbd>q</kbd></div><div class="desc">Stop recording macro</div></div>
+      <div class="keymap-row" data-keys="@a play macro run execute"><div class="keys"><kbd>@</kbd><kbd>a</kbd></div><div class="desc">Play macro from register <kbd>a</kbd></div></div>
+      <div class="keymap-row" data-keys="@@ repeat last macro run"><div class="keys"><kbd>@@</kbd></div><div class="desc">Repeat last played macro</div></div>
+      <div class="keymap-row" data-keys="10@a repeat macro count times"><div class="keys"><kbd>10@a</kbd></div><div class="desc">Run macro <kbd>a</kbd> 10 times</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Command Line</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys=":s substitute replace regex line"><div class="keys"><kbd>:s/old/new/</kbd></div><div class="desc">Replace first match on current line</div></div>
+      <div class="keymap-row" data-keys=":s substitute replace regex line all g"><div class="keys"><kbd>:s/old/new/g</kbd></div><div class="desc">Replace all matches on current line</div></div>
+      <div class="keymap-row" data-keys=":%s substitute replace regex all file"><div class="keys"><kbd>:%s/old/new/g</kbd></div><div class="desc">Replace all matches in entire file</div></div>
+      <div class="keymap-row" data-keys=":%s substitute replace regex all file confirm c"><div class="keys"><kbd>:%s/old/new/gc</kbd></div><div class="desc">Replace all with confirmation</div></div>
+      <div class="keymap-row" data-keys=":g global command match lines"><div class="keys"><kbd>:g/pattern/cmd</kbd></div><div class="desc">Run cmd on all lines matching pattern</div></div>
+      <div class="keymap-row" data-keys=":v global invert command no match lines"><div class="keys"><kbd>:v/pattern/cmd</kbd></div><div class="desc">Run cmd on lines NOT matching pattern</div></div>
+      <div class="keymap-row" data-keys=":noh nohlsearch clear highlight search"><div class="keys"><kbd>:noh</kbd></div><div class="desc">Clear search highlight</div></div>
+    </div>
+  </div>
+
+</div>
+
 <!-- TMUX TAB -->
 <div class="tab-panel" id="tab-tmux">
 
   <div class="leader-note">
-    <strong>Prefix = Ctrl+A</strong> — press <kbd>Ctrl</kbd><kbd>A</kbd> first, release, then press the next key.
+    <strong>Prefix = Ctrl+A</strong> — press <kbd>Ctrl</kbd><kbd>A</kbd> first, release, then press the next key. &nbsp;|&nbsp;
+    <strong>Plugins:</strong> after reload press <kbd>Prefix</kbd><kbd>I</kbd> to install all plugins via TPM.
   </div>
 
   <div class="section">
     <div class="section-title">Panes</div>
     <div class="keymaps-grid">
-      <div class="keymap-row" data-keys="Prefix | split horizontal pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split pane horizontal</div></div>
-      <div class="keymap-row" data-keys="Prefix - split vertical pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split pane vertical</div></div>
-      <div class="keymap-row" data-keys="Ctrl Alt Arrow navigate pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Navigate between panes</div></div>
+      <div class="keymap-row" data-keys="Prefix | split horizontal pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split pane right (horizontal)</div></div>
+      <div class="keymap-row" data-keys="Prefix v split vertical pane vim"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>v</kbd></div><div class="desc">Split pane right <em>(vim-style alias)</em></div></div>
+      <div class="keymap-row" data-keys="Prefix - split vertical pane below"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split pane below (vertical)</div></div>
+      <div class="keymap-row" data-keys="Prefix s split horizontal pane vim"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>s</kbd></div><div class="desc">Split pane below <em>(vim-style alias)</em></div></div>
+      <div class="keymap-row" data-keys="Prefix x kill pane close"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>x</kbd></div><div class="desc">Kill pane</div></div>
+      <div class="keymap-row" data-keys="Prefix z zoom fullscreen pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>z</kbd></div><div class="desc">Zoom / fullscreen pane (toggle)</div></div>
+      <div class="keymap-row" data-keys="Prefix p floax floating pane scratchpad"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>p</kbd></div><div class="desc">Floating pane overlay <em>(floax)</em></div></div>
+      <div class="keymap-row" data-keys="Prefix h j k l navigate pane vim"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>h/j/k/l</kbd></div><div class="desc">Navigate panes <em>(vim-style)</em></div></div>
+      <div class="keymap-row" data-keys="Ctrl Alt Arrow navigate pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Navigate panes <em>(arrow-style)</em></div></div>
+      <div class="keymap-row" data-keys="Ctrl Alt Shift Arrow resize pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Resize pane (5 cells)</div></div>
     </div>
   </div>
 
@@ -545,27 +765,44 @@
     <div class="section-title">Windows</div>
     <div class="keymaps-grid">
       <div class="keymap-row" data-keys="Prefix c new window create"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>c</kbd></div><div class="desc">New window</div></div>
-      <div class="keymap-row" data-keys="Prefix k kill window"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>k</kbd></div><div class="desc">Kill window</div></div>
+      <div class="keymap-row" data-keys="Prefix r rename window"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Rename window</div></div>
+      <div class="keymap-row" data-keys="Prefix X kill window close"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>X</kbd></div><div class="desc">Kill window</div></div>
       <div class="keymap-row" data-keys="Alt 1-9 switch window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch to window 1–9</div></div>
-      <div class="keymap-row" data-keys="Alt Arrow prev next window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Previous / next window</div></div>
+      <div class="keymap-row" data-keys="Alt Arrow prev next window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>←/→</kbd></div><div class="desc">Previous / next window</div></div>
+      <div class="keymap-row" data-keys="Alt Shift Arrow swap window reorder"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>←/→</kbd></div><div class="desc">Swap window left / right</div></div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">Sessions</div>
     <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix o sessionx fuzzy session picker zoxide"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Fuzzy session picker <em>(sessionx + zoxide)</em></div></div>
       <div class="keymap-row" data-keys="Prefix C new session create"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>C</kbd></div><div class="desc">New session</div></div>
+      <div class="keymap-row" data-keys="Prefix R rename session"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>R</kbd></div><div class="desc">Rename session</div></div>
       <div class="keymap-row" data-keys="Prefix K kill session"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>K</kbd></div><div class="desc">Kill session</div></div>
+      <div class="keymap-row" data-keys="Prefix P N prev next session switch"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>P</kbd><span class="sep">/</span><kbd>N</kbd></div><div class="desc">Previous / next session</div></div>
+      <div class="keymap-row" data-keys="Alt Up Down prev next session switch"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>↑/↓</kbd></div><div class="desc">Previous / next session</div></div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Copy Mode</div>
+    <div class="section-title">Copy Mode (vi)</div>
     <div class="keymaps-grid">
-      <div class="keymap-row" data-keys="Prefix [ copy mode enter"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>[</kbd></div><div class="desc">Enter copy mode (scroll)</div></div>
+      <div class="keymap-row" data-keys="Prefix [ copy mode enter scroll"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>[</kbd></div><div class="desc">Enter copy mode <em>(scroll / search history)</em></div></div>
       <div class="keymap-row" data-keys="q copy mode exit"><div class="keys"><kbd>q</kbd></div><div class="desc">Exit copy mode</div></div>
-      <div class="keymap-row" data-keys="Space v select start copy mode"><div class="keys"><kbd>Space</kbd></div><div class="desc">Start selection</div></div>
-      <div class="keymap-row" data-keys="Enter y copy mode yank"><div class="keys"><kbd>Enter</kbd></div><div class="desc">Copy selection</div></div>
+      <div class="keymap-row" data-keys="v select start copy mode visual"><div class="keys"><kbd>v</kbd></div><div class="desc">Begin selection</div></div>
+      <div class="keymap-row" data-keys="y yank copy selection clipboard"><div class="keys"><kbd>y</kbd></div><div class="desc">Yank selection to clipboard <em>(tmux-yank)</em></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Plugins &amp; Misc</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix I install plugins tpm"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>I</kbd></div><div class="desc">Install / update plugins <em>(TPM)</em></div></div>
+      <div class="keymap-row" data-keys="Prefix q reload config source"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>q</kbd></div><div class="desc">Reload tmux config</div></div>
+      <div class="keymap-row" data-keys="tmux-thumbs hints path url yank pick"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>Space</kbd></div><div class="desc">Thumbs hint mode <em>(pick paths/URLs with letters)</em></div></div>
+      <div class="keymap-row" data-keys="fzf url open browser tmux-fzf-url"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>u</kbd></div><div class="desc">FZF pick &amp; open URL from pane history</div></div>
+      <div class="keymap-row" data-keys="resurrect save restore session continuum"><div class="keys"><em>auto</em></div><div class="desc">Sessions auto-saved every 15 min &amp; restored on start <em>(continuum)</em></div></div>
     </div>
   </div>
 
@@ -633,11 +870,14 @@
   <div class="section">
     <div class="section-title">Most-Used — Tmux</div>
     <div class="keymaps-grid">
-      <div class="keymap-row" data-keys="Prefix | split horizontal"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split horizontal</div></div>
-      <div class="keymap-row" data-keys="Prefix - split vertical"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split vertical</div></div>
-      <div class="keymap-row" data-keys="Ctrl Alt Arrow navigate pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Move between panes</div></div>
+      <div class="keymap-row" data-keys="Prefix | v split horizontal pane"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>|</kbd><span class="sep">/</span><kbd>v</kbd></div><div class="desc">Split pane right</div></div>
+      <div class="keymap-row" data-keys="Prefix - s split vertical pane below"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>-</kbd><span class="sep">/</span><kbd>s</kbd></div><div class="desc">Split pane below</div></div>
+      <div class="keymap-row" data-keys="Prefix z zoom fullscreen pane"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>z</kbd></div><div class="desc">Zoom pane (fullscreen)</div></div>
+      <div class="keymap-row" data-keys="Prefix h j k l navigate pane vim"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>h/j/k/l</kbd></div><div class="desc">Navigate panes (vim)</div></div>
       <div class="keymap-row" data-keys="Prefix c new window"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>c</kbd></div><div class="desc">New window</div></div>
       <div class="keymap-row" data-keys="Alt 1-9 switch window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch window</div></div>
+      <div class="keymap-row" data-keys="Prefix o sessionx fuzzy session"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Session picker (sessionx)</div></div>
+      <div class="keymap-row" data-keys="Prefix p floax floating pane"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>p</kbd></div><div class="desc">Floating pane (floax)</div></div>
     </div>
   </div>
 
