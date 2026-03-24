@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keymaps Reference</title>
+<style>
+  :root {
+    --bg: #1a1b26;
+    --bg2: #16161e;
+    --bg3: #1f2335;
+    --border: #292e42;
+    --fg: #c0caf5;
+    --fg-dim: #565f89;
+    --blue: #7aa2f7;
+    --cyan: #7dcfff;
+    --green: #9ece6a;
+    --yellow: #e0af68;
+    --orange: #ff9e64;
+    --red: #f7768e;
+    --purple: #bb9af7;
+    --magenta: #bb9af7;
+    --highlight: #2d3f6b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 16px;
+    color: var(--blue);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+
+  #search {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  #search:focus { border-color: var(--blue); }
+  #search::placeholder { color: var(--fg-dim); }
+
+  #search-count {
+    color: var(--fg-dim);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--fg-dim);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 16px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    color: var(--yellow);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .keymaps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 4px;
+  }
+
+  .keymap-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+
+  .keymap-row:hover { background: var(--bg3); }
+
+  .keymap-row.hidden { display: none; }
+
+  .keys {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    min-width: 160px;
+  }
+
+  kbd {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--fg-dim);
+    border-radius: 4px;
+    color: var(--cyan);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    transition: background 0.1s;
+    user-select: none;
+  }
+
+  .keymap-row:hover kbd { background: var(--highlight); }
+
+  .sep {
+    color: var(--fg-dim);
+    font-size: 11px;
+  }
+
+  .desc {
+    color: var(--fg);
+    flex: 1;
+    font-size: 12px;
+  }
+
+  .desc em {
+    color: var(--fg-dim);
+    font-style: normal;
+    font-size: 11px;
+  }
+
+  .copied-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--green);
+    color: var(--bg);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .copied-toast.show { opacity: 1; }
+
+  mark {
+    background: var(--yellow);
+    color: var(--bg);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .no-results {
+    color: var(--fg-dim);
+    text-align: center;
+    padding: 40px;
+    display: none;
+  }
+
+  .no-results.show { display: block; }
+
+  .leader-note {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: 4px;
+    color: var(--fg-dim);
+    font-size: 12px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+  }
+
+  .leader-note strong { color: var(--purple); }
+
+  @media (max-width: 600px) {
+    .keymaps-grid { grid-template-columns: 1fr; }
+    .keys { min-width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⌨ Keymaps</h1>
+  <input type="search" id="search" placeholder="Search shortcuts... (e.g. git, split, buffer)" autocomplete="off" spellcheck="false">
+  <span id="search-count"></span>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="hyprland">Hyprland</button>
+  <button class="tab-btn" data-tab="neovim">Neovim</button>
+  <button class="tab-btn" data-tab="tmux">Tmux</button>
+  <button class="tab-btn" data-tab="yazi">Yazi</button>
+  <button class="tab-btn" data-tab="quick">Quick Reference</button>
+</nav>
+
+<main>
+
+<!-- HYPRLAND TAB -->
+<div class="tab-panel active" id="tab-hyprland">
+
+  <div class="section">
+    <div class="section-title">Apps</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super Return"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Return</kbd></div><div class="desc">Terminal</div></div>
+      <div class="keymap-row" data-keys="Super Alt Return"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Return</kbd></div><div class="desc">Tmux terminal</div></div>
+      <div class="keymap-row" data-keys="Super Shift Return"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Return</kbd></div><div class="desc">Browser</div></div>
+      <div class="keymap-row" data-keys="Super Shift N"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>N</kbd></div><div class="desc">Editor (Neovim)</div></div>
+      <div class="keymap-row" data-keys="Super Shift F"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>F</kbd></div><div class="desc">File manager</div></div>
+      <div class="keymap-row" data-keys="Super Shift V"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>V</kbd></div><div class="desc">VS Code</div></div>
+      <div class="keymap-row" data-keys="Super Shift D"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>D</kbd></div><div class="desc">Docker (lazydocker)</div></div>
+      <div class="keymap-row" data-keys="Super Shift G"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>G</kbd></div><div class="desc">GitHub</div></div>
+      <div class="keymap-row" data-keys="Super Shift O"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>O</kbd></div><div class="desc">Obsidian</div></div>
+      <div class="keymap-row" data-keys="Super Shift M"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>M</kbd></div><div class="desc">Music workspace</div></div>
+      <div class="keymap-row" data-keys="Super Shift A"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>A</kbd></div><div class="desc">ChatGPT</div></div>
+      <div class="keymap-row" data-keys="Super Shift C"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>C</kbd></div><div class="desc">Calendar</div></div>
+      <div class="keymap-row" data-keys="Super Shift E"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>E</kbd></div><div class="desc">Email</div></div>
+      <div class="keymap-row" data-keys="Super Shift Y"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Y</kbd></div><div class="desc">YouTube</div></div>
+      <div class="keymap-row" data-keys="Super Shift S"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>S</kbd></div><div class="desc">Screenshot</div></div>
+      <div class="keymap-row" data-keys="Super Shift K"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>K</kbd></div><div class="desc">This keymaps page</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Windows &amp; Tiling</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super W"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>W</kbd></div><div class="desc">Close window</div></div>
+      <div class="keymap-row" data-keys="Super T"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>T</kbd></div><div class="desc">Toggle float / tile</div></div>
+      <div class="keymap-row" data-keys="Super F"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>F</kbd></div><div class="desc">Fullscreen</div></div>
+      <div class="keymap-row" data-keys="Super J"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>J</kbd></div><div class="desc">Toggle split direction</div></div>
+      <div class="keymap-row" data-keys="Super Arrow"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Move focus</div></div>
+      <div class="keymap-row" data-keys="Super Shift Arrow"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Swap window</div></div>
+      <div class="keymap-row" data-keys="Super minus"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Resize window (shrink)</div></div>
+      <div class="keymap-row" data-keys="Super equals"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>=</kbd></div><div class="desc">Resize window (grow)</div></div>
+      <div class="keymap-row" data-keys="Super drag LMB"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>drag LMB</kbd></div><div class="desc">Move window</div></div>
+      <div class="keymap-row" data-keys="Super drag RMB"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>drag RMB</kbd></div><div class="desc">Resize window</div></div>
+      <div class="keymap-row" data-keys="Super G"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>G</kbd></div><div class="desc">Toggle group</div></div>
+      <div class="keymap-row" data-keys="Alt Tab"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>Tab</kbd></div><div class="desc">Cycle windows</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Workspaces</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super 1-0"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>1–0</kbd></div><div class="desc">Switch to workspace 1–10</div></div>
+      <div class="keymap-row" data-keys="Super Shift 1-0"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>1–0</kbd></div><div class="desc">Move window to workspace</div></div>
+      <div class="keymap-row" data-keys="Super Tab"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Tab</kbd></div><div class="desc">Next workspace</div></div>
+      <div class="keymap-row" data-keys="Super Shift Tab"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Tab</kbd></div><div class="desc">Previous workspace</div></div>
+      <div class="keymap-row" data-keys="Super S"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>S</kbd></div><div class="desc">Toggle scratchpad</div></div>
+      <div class="keymap-row" data-keys="Super Shift Alt Arrow"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Move workspace to monitor</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Media</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Volume Up Down"><div class="keys"><kbd>Vol Up</kbd><span class="sep">/</span><kbd>Vol Down</kbd></div><div class="desc">Volume control</div></div>
+      <div class="keymap-row" data-keys="Mute"><div class="keys"><kbd>Mute</kbd></div><div class="desc">Toggle mute</div></div>
+      <div class="keymap-row" data-keys="Brightness Up Down"><div class="keys"><kbd>Bright +</kbd><span class="sep">/</span><kbd>Bright -</kbd></div><div class="desc">Display brightness</div></div>
+      <div class="keymap-row" data-keys="Media Next Prev Play"><div class="keys"><kbd>Next</kbd><span class="sep">/</span><kbd>Prev</kbd><span class="sep">/</span><kbd>Play</kbd></div><div class="desc">Playerctl media controls</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Clipboard</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super C copy"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>C</kbd></div><div class="desc">Copy</div></div>
+      <div class="keymap-row" data-keys="Super V paste"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>V</kbd></div><div class="desc">Paste</div></div>
+      <div class="keymap-row" data-keys="Super X cut"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>X</kbd></div><div class="desc">Cut</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl V clipboard"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>V</kbd></div><div class="desc">Clipboard manager (history)</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Utilities</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super Space launcher"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Space</kbd></div><div class="desc">App launcher (Walker)</div></div>
+      <div class="keymap-row" data-keys="Super Escape system"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Esc</kbd></div><div class="desc">System menu</div></div>
+      <div class="keymap-row" data-keys="Super K keybindings"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>K</kbd></div><div class="desc">Show keybindings (omarchy)</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl L lock screen"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>L</kbd></div><div class="desc">Lock screen</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl B bluetooth"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>B</kbd></div><div class="desc">Bluetooth</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl W wifi"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>W</kbd></div><div class="desc">Wifi</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl A audio"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>A</kbd></div><div class="desc">Audio controls</div></div>
+      <div class="keymap-row" data-keys="Super Comma notification dismiss"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>,</kbd></div><div class="desc">Dismiss notification</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NEOVIM TAB -->
+<div class="tab-panel" id="tab-neovim">
+
+  <div class="leader-note">
+    <strong>Leader = Space</strong> — press <kbd>Space</kbd> then the next key(s). &nbsp;|&nbsp;
+    <strong>Custom escape:</strong> type <kbd>j</kbd><kbd>j</kbd> or <kbd>j</kbd><kbd>k</kbd> in insert mode to return to normal mode.
+  </div>
+
+  <div class="section">
+    <div class="section-title">Modes &amp; Escape (beginner essentials)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="i insert mode"><div class="keys"><kbd>i</kbd></div><div class="desc">Enter insert mode <em>(type text)</em></div></div>
+      <div class="keymap-row" data-keys="Esc jj jk normal mode escape"><div class="keys"><kbd>Esc</kbd><span class="sep">/</span><kbd>jj</kbd><span class="sep">/</span><kbd>jk</kbd></div><div class="desc">Back to normal mode</div></div>
+      <div class="keymap-row" data-keys="v visual"><div class="keys"><kbd>v</kbd></div><div class="desc">Visual mode <em>(select chars)</em></div></div>
+      <div class="keymap-row" data-keys="V visual line"><div class="keys"><kbd>V</kbd></div><div class="desc">Visual line mode <em>(select lines)</em></div></div>
+      <div class="keymap-row" data-keys=": command"><div class="keys"><kbd>:</kbd></div><div class="desc">Command mode</div></div>
+      <div class="keymap-row" data-keys="hjkl navigation"><div class="keys"><kbd>h</kbd><span class="sep">/</span><kbd>j</kbd><span class="sep">/</span><kbd>k</kbd><span class="sep">/</span><kbd>l</kbd></div><div class="desc">Left / Down / Up / Right</div></div>
+      <div class="keymap-row" data-keys="Ctrl h j k l windows splits move"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>h/j/k/l</kbd></div><div class="desc">Move between splits/windows</div></div>
+      <div class="keymap-row" data-keys="Alt j k move line"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>j</kbd><span class="sep">/</span><kbd>k</kbd></div><div class="desc">Move current line down / up</div></div>
+      <div class="keymap-row" data-keys="Ctrl s save"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>S</kbd></div><div class="desc">Save file</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Files &amp; Buffers</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader Space find files"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>Space</kbd></div><div class="desc">Find files (smart)</div></div>
+      <div class="keymap-row" data-keys="Leader ff find files"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>f</kbd></div><div class="desc">Find files (project root)</div></div>
+      <div class="keymap-row" data-keys="Leader fF find files cwd"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>F</kbd></div><div class="desc">Find files (current dir)</div></div>
+      <div class="keymap-row" data-keys="Leader fr recent files"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Recent files</div></div>
+      <div class="keymap-row" data-keys="Leader fn new file"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>n</kbd></div><div class="desc">New file</div></div>
+      <div class="keymap-row" data-keys="Leader fe explorer neotree"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>e</kbd></div><div class="desc">File explorer (NeoTree, root)</div></div>
+      <div class="keymap-row" data-keys="Leader fE explorer neotree cwd"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>E</kbd></div><div class="desc">File explorer (current dir)</div></div>
+      <div class="keymap-row" data-keys="Leader fy yazi file"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>y</kbd></div><div class="desc">Yazi (at current file)</div></div>
+      <div class="keymap-row" data-keys="Leader fY yazi cwd"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>Y</kbd></div><div class="desc">Yazi (current dir)</div></div>
+      <div class="keymap-row" data-keys="Leader fm mini files"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>m</kbd></div><div class="desc">Mini.files explorer</div></div>
+      <div class="keymap-row" data-keys="Leader fp project picker"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>f</kbd><span class="sep">+</span><kbd>p</kbd></div><div class="desc">Project picker</div></div>
+      <div class="keymap-row" data-keys="Shift H prev buffer"><div class="keys"><kbd>Shift</kbd><span class="sep">+</span><kbd>H</kbd></div><div class="desc">Previous buffer (open file)</div></div>
+      <div class="keymap-row" data-keys="Shift L next buffer"><div class="keys"><kbd>Shift</kbd><span class="sep">+</span><kbd>L</kbd></div><div class="desc">Next buffer</div></div>
+      <div class="keymap-row" data-keys="Leader , buffers pick"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>,</kbd></div><div class="desc">Pick from open buffers</div></div>
+      <div class="keymap-row" data-keys="Leader bb buffer last switch"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>b</kbd><span class="sep">+</span><kbd>b</kbd></div><div class="desc">Switch to last buffer</div></div>
+      <div class="keymap-row" data-keys="Leader bd buffer delete close"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>b</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Close buffer</div></div>
+      <div class="keymap-row" data-keys="Leader bo buffer close others"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>b</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Close other buffers</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Search</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader / grep search project"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>/</kbd></div><div class="desc">Grep in project</div></div>
+      <div class="keymap-row" data-keys="Leader sg grep root"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>g</kbd></div><div class="desc">Grep (project root)</div></div>
+      <div class="keymap-row" data-keys="Leader sw search word cursor"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>w</kbd></div><div class="desc">Search word under cursor</div></div>
+      <div class="keymap-row" data-keys="Leader sb search buffer"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>b</kbd></div><div class="desc">Search in current buffer</div></div>
+      <div class="keymap-row" data-keys="Leader sh search help"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>h</kbd></div><div class="desc">Search help pages</div></div>
+      <div class="keymap-row" data-keys="Leader sk search keymaps"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>k</kbd></div><div class="desc">Search keymaps</div></div>
+      <div class="keymap-row" data-keys="Leader sd search diagnostics"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Search diagnostics</div></div>
+      <div class="keymap-row" data-keys="Leader sr search replace"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Search &amp; replace</div></div>
+      <div class="keymap-row" data-keys="Leader sR search resume last"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>s</kbd><span class="sep">+</span><kbd>R</kbd></div><div class="desc">Resume last search</div></div>
+      <div class="keymap-row" data-keys="s flash jump"><div class="keys"><kbd>s</kbd></div><div class="desc">Flash jump — type letters to jump anywhere</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Git</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader gg lazygit git"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>g</kbd></div><div class="desc">LazyGit</div></div>
+      <div class="keymap-row" data-keys="Leader gb git blame"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>b</kbd></div><div class="desc">Git blame (current line)</div></div>
+      <div class="keymap-row" data-keys="Leader gd git diff"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Git diff hunks</div></div>
+      <div class="keymap-row" data-keys="Leader gs git status"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>s</kbd></div><div class="desc">Git status</div></div>
+      <div class="keymap-row" data-keys="Leader gf git file history"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>f</kbd></div><div class="desc">File history</div></div>
+      <div class="keymap-row" data-keys="Leader gl git log"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>l</kbd></div><div class="desc">Git log</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">LSP &amp; Code</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="gd go to definition lsp"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Go to definition</div></div>
+      <div class="keymap-row" data-keys="gr references lsp"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Show references</div></div>
+      <div class="keymap-row" data-keys="gI implementation lsp"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>I</kbd></div><div class="desc">Go to implementation</div></div>
+      <div class="keymap-row" data-keys="gy type definition lsp"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>y</kbd></div><div class="desc">Go to type definition</div></div>
+      <div class="keymap-row" data-keys="K hover docs lsp"><div class="keys"><kbd>K</kbd></div><div class="desc">Hover docs</div></div>
+      <div class="keymap-row" data-keys="gK signature help lsp"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>K</kbd></div><div class="desc">Signature help</div></div>
+      <div class="keymap-row" data-keys="Leader ca code action lsp"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>a</kbd></div><div class="desc">Code action</div></div>
+      <div class="keymap-row" data-keys="Leader cr rename symbol lsp"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Rename symbol</div></div>
+      <div class="keymap-row" data-keys="Leader cf format code lsp"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>f</kbd></div><div class="desc">Format code</div></div>
+      <div class="keymap-row" data-keys="Leader cd diagnostics line"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Line diagnostics</div></div>
+      <div class="keymap-row" data-keys="]d [d next prev diagnostic"><div class="keys"><kbd>]d</kbd><span class="sep">/</span><kbd>[d</kbd></div><div class="desc">Next / prev diagnostic</div></div>
+      <div class="keymap-row" data-keys="]e [e next prev error"><div class="keys"><kbd>]e</kbd><span class="sep">/</span><kbd>[e</kbd></div><div class="desc">Next / prev error</div></div>
+      <div class="keymap-row" data-keys="Leader cl lsp info"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>l</kbd></div><div class="desc">LSP info</div></div>
+      <div class="keymap-row" data-keys="Leader cm mason install lsp"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>m</kbd></div><div class="desc">Mason (install LSPs)</div></div>
+      <div class="keymap-row" data-keys="Leader co organize imports"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Organize imports</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Windows &amp; Splits</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader - split below"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split below</div></div>
+      <div class="keymap-row" data-keys="Leader | split right"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split right</div></div>
+      <div class="keymap-row" data-keys="Leader wd window delete close"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>w</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Close window</div></div>
+      <div class="keymap-row" data-keys="Leader wm window maximize zoom"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>w</kbd><span class="sep">+</span><kbd>m</kbd></div><div class="desc">Zoom / maximize window</div></div>
+      <div class="keymap-row" data-keys="Ctrl Up Down Left Right resize window"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Arrows</kbd></div><div class="desc">Resize windows</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Harpoon — Quick File Nav</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader H harpoon mark file"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>H</kbd></div><div class="desc">Mark current file</div></div>
+      <div class="keymap-row" data-keys="Leader h harpoon menu"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>h</kbd></div><div class="desc">Harpoon menu</div></div>
+      <div class="keymap-row" data-keys="Leader 1-9 harpoon jump"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Jump to harpoon file 1–9</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Surround (mini.surround)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="sa add surround"><div class="keys"><kbd>s</kbd><span class="sep">+</span><kbd>a</kbd></div><div class="desc">Add surround <em>(e.g. saW" wraps word in quotes)</em></div></div>
+      <div class="keymap-row" data-keys="sd delete surround"><div class="keys"><kbd>s</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Delete surround</div></div>
+      <div class="keymap-row" data-keys="sr replace surround"><div class="keys"><kbd>s</kbd><span class="sep">+</span><kbd>r</kbd></div><div class="desc">Replace surround</div></div>
+      <div class="keymap-row" data-keys="gsf gsF find surrounding"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>sf</kbd><span class="sep">/</span><kbd>sF</kbd></div><div class="desc">Find surrounding (next/prev)</div></div>
+      <div class="keymap-row" data-keys="gsh highlight surrounding"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>sh</kbd></div><div class="desc">Highlight surrounding</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">OpenCode — AI</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader ot toggle ai panel opencode"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>o</kbd><span class="sep">+</span><kbd>t</kbd></div><div class="desc">Toggle AI panel</div></div>
+      <div class="keymap-row" data-keys="Leader oa ask code ai opencode"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>o</kbd><span class="sep">+</span><kbd>a</kbd></div><div class="desc">Ask about code</div></div>
+      <div class="keymap-row" data-keys="Leader oe explain code ai opencode"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>o</kbd><span class="sep">+</span><kbd>e</kbd></div><div class="desc">Explain code</div></div>
+      <div class="keymap-row" data-keys="Leader on new session ai opencode"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>o</kbd><span class="sep">+</span><kbd>n</kbd></div><div class="desc">New AI session</div></div>
+      <div class="keymap-row" data-keys="Leader os select prompt ai opencode"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>o</kbd><span class="sep">+</span><kbd>s</kbd></div><div class="desc">Select prompt</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Debugging (DAP)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader db breakpoint debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>b</kbd></div><div class="desc">Toggle breakpoint</div></div>
+      <div class="keymap-row" data-keys="Leader dc continue debug run"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>c</kbd></div><div class="desc">Run / continue</div></div>
+      <div class="keymap-row" data-keys="Leader di step into debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>i</kbd></div><div class="desc">Step into</div></div>
+      <div class="keymap-row" data-keys="Leader do step out debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Step out</div></div>
+      <div class="keymap-row" data-keys="Leader dO step over debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>O</kbd></div><div class="desc">Step over</div></div>
+      <div class="keymap-row" data-keys="Leader dt terminate debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>t</kbd></div><div class="desc">Terminate</div></div>
+      <div class="keymap-row" data-keys="Leader du dap ui debug"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>d</kbd><span class="sep">+</span><kbd>u</kbd></div><div class="desc">DAP UI toggle</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">UI Toggles (Leader+u)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader uf format auto toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>f</kbd></div><div class="desc">Toggle auto-format</div></div>
+      <div class="keymap-row" data-keys="Leader us spell check toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>s</kbd></div><div class="desc">Toggle spell check</div></div>
+      <div class="keymap-row" data-keys="Leader uw word wrap toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>w</kbd></div><div class="desc">Toggle line wrap</div></div>
+      <div class="keymap-row" data-keys="Leader ul line numbers toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>l</kbd></div><div class="desc">Toggle line numbers</div></div>
+      <div class="keymap-row" data-keys="Leader uL relative numbers toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>L</kbd></div><div class="desc">Toggle relative numbers</div></div>
+      <div class="keymap-row" data-keys="Leader ud diagnostics toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Toggle diagnostics</div></div>
+      <div class="keymap-row" data-keys="Leader uh inlay hints toggle"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>h</kbd></div><div class="desc">Toggle inlay hints</div></div>
+      <div class="keymap-row" data-keys="Leader uC colorscheme theme pick"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>C</kbd></div><div class="desc">Pick colorscheme</div></div>
+      <div class="keymap-row" data-keys="Leader un dismiss notifications"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>u</kbd><span class="sep">+</span><kbd>n</kbd></div><div class="desc">Dismiss notifications</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Misc</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Leader l lazy plugin manager"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>l</kbd></div><div class="desc">Lazy plugin manager</div></div>
+      <div class="keymap-row" data-keys="Leader qq quit all exit"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>q</kbd><span class="sep">+</span><kbd>q</kbd></div><div class="desc">Quit all</div></div>
+      <div class="keymap-row" data-keys="Leader ? which-key keymaps help"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>?</kbd></div><div class="desc">Show buffer keymaps (which-key)</div></div>
+      <div class="keymap-row" data-keys="Leader xx trouble diagnostics panel"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>x</kbd><span class="sep">+</span><kbd>x</kbd></div><div class="desc">Trouble diagnostics panel</div></div>
+      <div class="keymap-row" data-keys="Leader xt todo comments"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>x</kbd><span class="sep">+</span><kbd>t</kbd></div><div class="desc">Todo comments</div></div>
+      <div class="keymap-row" data-keys="Leader Tab new tab"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>Tab</kbd><span class="sep">+</span><kbd>Tab</kbd></div><div class="desc">New tab</div></div>
+      <div class="keymap-row" data-keys="Leader Tab ] [ next prev tab"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>Tab</kbd><span class="sep">+</span><kbd>]</kbd><span class="sep">/</span><kbd>[</kbd></div><div class="desc">Next / prev tab</div></div>
+      <div class="keymap-row" data-keys="Leader Tab d close tab"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>Tab</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Close tab</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TMUX TAB -->
+<div class="tab-panel" id="tab-tmux">
+
+  <div class="leader-note">
+    <strong>Prefix = Ctrl+A</strong> — press <kbd>Ctrl</kbd><kbd>A</kbd> first, release, then press the next key.
+  </div>
+
+  <div class="section">
+    <div class="section-title">Panes</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix | split horizontal pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split pane horizontal</div></div>
+      <div class="keymap-row" data-keys="Prefix - split vertical pane"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split pane vertical</div></div>
+      <div class="keymap-row" data-keys="Ctrl Alt Arrow navigate pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Navigate between panes</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Windows</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix c new window create"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>c</kbd></div><div class="desc">New window</div></div>
+      <div class="keymap-row" data-keys="Prefix k kill window"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>k</kbd></div><div class="desc">Kill window</div></div>
+      <div class="keymap-row" data-keys="Alt 1-9 switch window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch to window 1–9</div></div>
+      <div class="keymap-row" data-keys="Alt Arrow prev next window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Previous / next window</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Sessions</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix C new session create"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>C</kbd></div><div class="desc">New session</div></div>
+      <div class="keymap-row" data-keys="Prefix K kill session"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>K</kbd></div><div class="desc">Kill session</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Copy Mode</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix [ copy mode enter"><div class="keys"><kbd>Prefix</kbd><span class="sep">+</span><kbd>[</kbd></div><div class="desc">Enter copy mode (scroll)</div></div>
+      <div class="keymap-row" data-keys="q copy mode exit"><div class="keys"><kbd>q</kbd></div><div class="desc">Exit copy mode</div></div>
+      <div class="keymap-row" data-keys="Space v select start copy mode"><div class="keys"><kbd>Space</kbd></div><div class="desc">Start selection</div></div>
+      <div class="keymap-row" data-keys="Enter y copy mode yank"><div class="keys"><kbd>Enter</kbd></div><div class="desc">Copy selection</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- YAZI TAB -->
+<div class="tab-panel" id="tab-yazi">
+
+  <div class="section">
+    <div class="section-title">Navigation</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="hjkl navigate yazi"><div class="keys"><kbd>h</kbd><span class="sep">/</span><kbd>j</kbd><span class="sep">/</span><kbd>k</kbd><span class="sep">/</span><kbd>l</kbd></div><div class="desc">Left (up dir) / Down / Up / Right (enter dir)</div></div>
+      <div class="keymap-row" data-keys="Enter open file yazi"><div class="keys"><kbd>Enter</kbd></div><div class="desc">Open file</div></div>
+      <div class="keymap-row" data-keys=". toggle hidden yazi"><div class="keys"><kbd>.</kbd></div><div class="desc">Toggle hidden files</div></div>
+      <div class="keymap-row" data-keys="q quit yazi"><div class="keys"><kbd>q</kbd></div><div class="desc">Quit</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">File Operations</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Space select file yazi"><div class="keys"><kbd>Space</kbd></div><div class="desc">Select / deselect file</div></div>
+      <div class="keymap-row" data-keys="y yank copy yazi"><div class="keys"><kbd>y</kbd></div><div class="desc">Yank (copy)</div></div>
+      <div class="keymap-row" data-keys="p paste yazi"><div class="keys"><kbd>p</kbd></div><div class="desc">Paste</div></div>
+      <div class="keymap-row" data-keys="d delete cut yazi"><div class="keys"><kbd>d</kbd></div><div class="desc">Delete / cut</div></div>
+      <div class="keymap-row" data-keys="r rename yazi"><div class="keys"><kbd>r</kbd></div><div class="desc">Rename</div></div>
+      <div class="keymap-row" data-keys="a create new file yazi"><div class="keys"><kbd>a</kbd></div><div class="desc">Create new file / directory</div></div>
+      <div class="keymap-row" data-keys="/ search filter yazi"><div class="keys"><kbd>/</kbd></div><div class="desc">Search / filter files</div></div>
+      <div class="keymap-row" data-keys="z jump cd yazi"><div class="keys"><kbd>z</kbd></div><div class="desc">Jump to directory (zoxide)</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- QUICK REFERENCE TAB -->
+<div class="tab-panel" id="tab-quick">
+
+  <div class="section">
+    <div class="section-title">Most-Used — Desktop (Hyprland)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Super Space launcher"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Space</kbd></div><div class="desc">App launcher</div></div>
+      <div class="keymap-row" data-keys="Super Return terminal"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Return</kbd></div><div class="desc">Terminal</div></div>
+      <div class="keymap-row" data-keys="Super Shift Return browser"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>Return</kbd></div><div class="desc">Browser</div></div>
+      <div class="keymap-row" data-keys="Super W close window"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>W</kbd></div><div class="desc">Close window</div></div>
+      <div class="keymap-row" data-keys="Super 1-9 workspace"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch workspace</div></div>
+      <div class="keymap-row" data-keys="Super Shift S screenshot"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Shift</kbd><span class="sep">+</span><kbd>S</kbd></div><div class="desc">Screenshot</div></div>
+      <div class="keymap-row" data-keys="Super Ctrl L lock"><div class="keys"><kbd>Super</kbd><span class="sep">+</span><kbd>Ctrl</kbd><span class="sep">+</span><kbd>L</kbd></div><div class="desc">Lock screen</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Most-Used — Neovim</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="jj jk escape insert normal"><div class="keys"><kbd>j</kbd><kbd>j</kbd><span class="sep">/</span><kbd>j</kbd><kbd>k</kbd></div><div class="desc">Escape to normal mode</div></div>
+      <div class="keymap-row" data-keys="Ctrl s save"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>S</kbd></div><div class="desc">Save file</div></div>
+      <div class="keymap-row" data-keys="Leader Space find files"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>Space</kbd></div><div class="desc">Find files</div></div>
+      <div class="keymap-row" data-keys="Leader / grep search"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>/</kbd></div><div class="desc">Grep in project</div></div>
+      <div class="keymap-row" data-keys="Leader gg lazygit"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>g</kbd><span class="sep">+</span><kbd>g</kbd></div><div class="desc">LazyGit</div></div>
+      <div class="keymap-row" data-keys="gd go definition"><div class="keys"><kbd>g</kbd><span class="sep">+</span><kbd>d</kbd></div><div class="desc">Go to definition</div></div>
+      <div class="keymap-row" data-keys="K hover docs"><div class="keys"><kbd>K</kbd></div><div class="desc">Hover docs</div></div>
+      <div class="keymap-row" data-keys="Leader ca code action"><div class="keys"><kbd>Spc</kbd><span class="sep">+</span><kbd>c</kbd><span class="sep">+</span><kbd>a</kbd></div><div class="desc">Code action</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Most-Used — Tmux</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="Prefix | split horizontal"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>|</kbd></div><div class="desc">Split horizontal</div></div>
+      <div class="keymap-row" data-keys="Prefix - split vertical"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>-</kbd></div><div class="desc">Split vertical</div></div>
+      <div class="keymap-row" data-keys="Ctrl Alt Arrow navigate pane"><div class="keys"><kbd>Ctrl</kbd><span class="sep">+</span><kbd>Alt</kbd><span class="sep">+</span><kbd>Arrow</kbd></div><div class="desc">Move between panes</div></div>
+      <div class="keymap-row" data-keys="Prefix c new window"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>c</kbd></div><div class="desc">New window</div></div>
+      <div class="keymap-row" data-keys="Alt 1-9 switch window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch window</div></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<div class="no-results" id="no-results">No shortcuts found for "<span id="no-results-term"></span>"</div>
+<div class="copied-toast" id="copied-toast">Copied!</div>
+
+<script>
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      applySearch(document.getElementById('search').value);
+    });
+  });
+
+  // Copy on click
+  const toast = document.getElementById('copied-toast');
+  let toastTimeout;
+
+  document.querySelectorAll('.keymap-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const keys = row.dataset.keys || row.querySelector('.keys').textContent.trim();
+      navigator.clipboard.writeText(keys).catch(() => {});
+      clearTimeout(toastTimeout);
+      toast.classList.add('show');
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 1500);
+    });
+  });
+
+  // Search
+  const searchInput = document.getElementById('search');
+  const countEl = document.getElementById('search-count');
+  const noResults = document.getElementById('no-results');
+  const noResultsTerm = document.getElementById('no-results-term');
+
+  function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlight(el, term) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) nodes.push(node);
+    nodes.forEach(n => {
+      if (!n.textContent.trim()) return;
+      const re = new RegExp('(' + escapeRegex(term) + ')', 'gi');
+      if (re.test(n.textContent)) {
+        const span = document.createElement('span');
+        span.innerHTML = n.textContent.replace(re, '<mark>$1</mark>');
+        n.parentNode.replaceChild(span, n);
+      }
+    });
+  }
+
+  function clearHighlights(el) {
+    el.querySelectorAll('mark').forEach(m => {
+      const parent = m.parentNode;
+      parent.replaceChild(document.createTextNode(m.textContent), m);
+      parent.normalize();
+    });
+    el.querySelectorAll('span:not(.sep):not(.keys):not(.desc)').forEach(s => {
+      if (s.children.length === 0 && s.parentNode) {
+        const txt = document.createTextNode(s.textContent);
+        s.parentNode.replaceChild(txt, s);
+      }
+    });
+  }
+
+  function applySearch(term) {
+    const trimmed = term.trim().toLowerCase();
+    const allRows = document.querySelectorAll('.keymap-row');
+
+    allRows.forEach(row => {
+      clearHighlights(row);
+    });
+
+    if (!trimmed) {
+      allRows.forEach(row => row.classList.remove('hidden'));
+      countEl.textContent = '';
+      noResults.classList.remove('show');
+      // Show all tab panels restore (handled by tab btn)
+      return;
+    }
+
+    let visible = 0;
+    let activeTabHasResults = false;
+    const activePanel = document.querySelector('.tab-panel.active');
+
+    allRows.forEach(row => {
+      const searchable = (row.dataset.keys || '') + ' ' + row.querySelector('.desc').textContent;
+      if (searchable.toLowerCase().includes(trimmed)) {
+        row.classList.remove('hidden');
+        highlight(row, term.trim());
+        visible++;
+        if (activePanel && activePanel.contains(row)) activeTabHasResults = true;
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+
+    countEl.textContent = visible > 0 ? visible + ' match' + (visible !== 1 ? 'es' : '') : '';
+
+    if (visible === 0) {
+      noResults.classList.add('show');
+      noResultsTerm.textContent = trimmed;
+    } else {
+      noResults.classList.remove('show');
+    }
+  }
+
+  searchInput.addEventListener('input', e => applySearch(e.target.value));
+
+  // Focus search on Ctrl+F or /
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey && e.key === 'f') || e.key === '/') {
+      if (document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.value = '';
+      applySearch('');
+      searchInput.blur();
+    }
+  });
+</script>
+</body>
+</html>
