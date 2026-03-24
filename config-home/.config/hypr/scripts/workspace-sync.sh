@@ -223,9 +223,9 @@ sync_workspace_pair() {
 
   if (( base_workspace >= 1 && base_workspace <= 10 )) && (( monitor_count > 1 )); then
     dispatch focusmonitor "$left_monitor"
-    dispatch workspace "$base_workspace"
+    dispatch focusworkspaceoncurrentmonitor "$base_workspace"
     dispatch focusmonitor "$right_monitor"
-    dispatch workspace "$((base_workspace + 100))"
+    dispatch focusworkspaceoncurrentmonitor "$((base_workspace + 100))"
     dispatch focusmonitor "$focused_monitor"
   else
     dispatch workspace "$base_workspace"
