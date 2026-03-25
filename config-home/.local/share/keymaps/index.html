@@ -250,6 +250,8 @@
   <button class="tab-btn" data-tab="tmux">Tmux</button>
   <button class="tab-btn" data-tab="yazi">Yazi</button>
   <button class="tab-btn" data-tab="quick">Quick Reference</button>
+  <button class="tab-btn" data-tab="vimlearn">Vim Learning</button>
+  <button class="tab-btn" data-tab="gitworktree">Git Worktree</button>
 </nav>
 
 <main>
@@ -878,6 +880,161 @@
       <div class="keymap-row" data-keys="Alt 1-9 switch window"><div class="keys"><kbd>Alt</kbd><span class="sep">+</span><kbd>1–9</kbd></div><div class="desc">Switch window</div></div>
       <div class="keymap-row" data-keys="Prefix o sessionx fuzzy session"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>o</kbd></div><div class="desc">Session picker (sessionx)</div></div>
       <div class="keymap-row" data-keys="Prefix p floax floating pane"><div class="keys"><kbd>Ctrl+A</kbd><span class="sep">+</span><kbd>p</kbd></div><div class="desc">Floating pane (floax)</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- VIM LEARNING TAB -->
+<div class="tab-panel" id="tab-vimlearn">
+
+  <div class="leader-note">
+    <strong>5-Phase Vim + LazyVim Learning Plan</strong> — work through one phase per week. Each phase builds on the last. Use search to find specific keys.
+  </div>
+
+  <div class="section">
+    <div class="section-title">Phase 1 — Survival (Week 1)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="normal insert visual mode escape"><div class="keys"><kbd>i</kbd> / <kbd>Esc</kbd></div><div class="desc">Enter Insert / return to Normal mode</div></div>
+      <div class="keymap-row" data-keys="normal insert visual mode escape jj jk"><div class="keys"><kbd>jj</kbd> or <kbd>jk</kbd></div><div class="desc">Exit Insert mode (custom — same as Esc)</div></div>
+      <div class="keymap-row" data-keys="visual mode select v V"><div class="keys"><kbd>v</kbd> / <kbd>V</kbd></div><div class="desc">Visual (char) / Visual (line) mode</div></div>
+      <div class="keymap-row" data-keys="hjkl navigation move left down up right"><div class="keys"><kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd></div><div class="desc">Move left / down / up / right</div></div>
+      <div class="keymap-row" data-keys="word navigation w b e"><div class="keys"><kbd>w</kbd> / <kbd>b</kbd> / <kbd>e</kbd></div><div class="desc">Next word / prev word / end of word</div></div>
+      <div class="keymap-row" data-keys="line navigation 0 dollar start end"><div class="keys"><kbd>0</kbd> / <kbd>$</kbd></div><div class="desc">Start / end of line</div></div>
+      <div class="keymap-row" data-keys="gg G file top bottom navigation"><div class="keys"><kbd>gg</kbd> / <kbd>G</kbd></div><div class="desc">Top / bottom of file</div></div>
+      <div class="keymap-row" data-keys="x delete character"><div class="keys"><kbd>x</kbd></div><div class="desc">Delete character under cursor</div></div>
+      <div class="keymap-row" data-keys="dd delete line"><div class="keys"><kbd>dd</kbd></div><div class="desc">Delete (cut) line</div></div>
+      <div class="keymap-row" data-keys="yy yank copy line"><div class="keys"><kbd>yy</kbd></div><div class="desc">Yank (copy) line</div></div>
+      <div class="keymap-row" data-keys="p paste put"><div class="keys"><kbd>p</kbd></div><div class="desc">Paste after cursor</div></div>
+      <div class="keymap-row" data-keys="u undo ctrl r redo"><div class="keys"><kbd>u</kbd> / <kbd>Ctrl+r</kbd></div><div class="desc">Undo / Redo</div></div>
+      <div class="keymap-row" data-keys="write save quit ZZ ZQ :w :q"><div class="keys"><kbd>:w</kbd> / <kbd>:q</kbd> / <kbd>:wq</kbd></div><div class="desc">Write / Quit / Write &amp; Quit</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Phase 2 — Movement (Week 2)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="f t find till jump character"><div class="keys"><kbd>f</kbd><em>c</em> / <kbd>t</kbd><em>c</em></div><div class="desc">Jump to / before character <em>c</em> on line</div></div>
+      <div class="keymap-row" data-keys="F T find till backward reverse character"><div class="keys"><kbd>F</kbd><em>c</em> / <kbd>T</kbd><em>c</em></div><div class="desc">Same, backwards</div></div>
+      <div class="keymap-row" data-keys="semicolon comma repeat f t"><div class="keys"><kbd>;</kbd> / <kbd>,</kbd></div><div class="desc">Repeat f/t forward / backward</div></div>
+      <div class="keymap-row" data-keys="percent match bracket jump"><div class="keys"><kbd>%</kbd></div><div class="desc">Jump to matching bracket / paren</div></div>
+      <div class="keymap-row" data-keys="ctrl d u scroll half page"><div class="keys"><kbd>Ctrl+d</kbd> / <kbd>Ctrl+u</kbd></div><div class="desc">Scroll half-page down / up</div></div>
+      <div class="keymap-row" data-keys="text objects iw aw ip ap inside around word paragraph"><div class="keys"><kbd>iw</kbd> / <kbd>aw</kbd></div><div class="desc">Text object: inner word / a word (with space)</div></div>
+      <div class="keymap-row" data-keys="text objects i( a( i{ a{ i[ a[ inside around bracket paren brace"><div class="keys"><kbd>i(</kbd> / <kbd>a(</kbd></div><div class="desc">Text object: inner / outer parens (works for {, [, ", ' too)</div></div>
+      <div class="keymap-row" data-keys="ciw caw change inner word text object"><div class="keys"><kbd>ciw</kbd></div><div class="desc">Change inner word (delete word, enter Insert)</div></div>
+      <div class="keymap-row" data-keys="diw daw delete inner word text object"><div class="keys"><kbd>diw</kbd> / <kbd>daw</kbd></div><div class="desc">Delete inner word / a word</div></div>
+      <div class="keymap-row" data-keys="yiw yaw yank inner word text object"><div class="keys"><kbd>yiw</kbd></div><div class="desc">Yank inner word</div></div>
+      <div class="keymap-row" data-keys="lazyvim neo-tree file explorer leader e"><div class="keys"><kbd>Space</kbd><kbd>e</kbd></div><div class="desc">Toggle Neo-tree file explorer</div></div>
+      <div class="keymap-row" data-keys="lazyvim telescope fuzzy find files leader space"><div class="keys"><kbd>Space</kbd><kbd>Space</kbd></div><div class="desc">Fuzzy find files (Telescope)</div></div>
+      <div class="keymap-row" data-keys="lazyvim telescope grep search leader /"><div class="keys"><kbd>Space</kbd><kbd>/</kbd></div><div class="desc">Live grep (search in project)</div></div>
+      <div class="keymap-row" data-keys="lazyvim buffer list leader b leader comma"><div class="keys"><kbd>Space</kbd><kbd>,</kbd></div><div class="desc">Switch buffer (fuzzy)</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Phase 3 — JS/TS Workflow (Week 3)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="gd go to definition lsp"><div class="keys"><kbd>gd</kbd></div><div class="desc">Go to definition (LSP)</div></div>
+      <div class="keymap-row" data-keys="gD go to declaration lsp"><div class="keys"><kbd>gD</kbd></div><div class="desc">Go to declaration</div></div>
+      <div class="keymap-row" data-keys="gr go to references lsp telescope"><div class="keys"><kbd>gr</kbd></div><div class="desc">Go to references (Telescope list)</div></div>
+      <div class="keymap-row" data-keys="K hover docs lsp documentation"><div class="keys"><kbd>K</kbd></div><div class="desc">Hover docs / signature (LSP)</div></div>
+      <div class="keymap-row" data-keys="leader ca code action lsp fix"><div class="keys"><kbd>Space</kbd><kbd>ca</kbd></div><div class="desc">Code action (fix, import, refactor…)</div></div>
+      <div class="keymap-row" data-keys="leader cr rename symbol lsp"><div class="keys"><kbd>Space</kbd><kbd>cr</kbd></div><div class="desc">Rename symbol (LSP)</div></div>
+      <div class="keymap-row" data-keys="leader cf format prettier lsp"><div class="keys"><kbd>Space</kbd><kbd>cf</kbd></div><div class="desc">Format file (Prettier / LSP)</div></div>
+      <div class="keymap-row" data-keys="ctrl n completion autocomplete select next"><div class="keys"><kbd>Ctrl+n</kbd> / <kbd>Ctrl+p</kbd></div><div class="desc">Next / prev completion item</div></div>
+      <div class="keymap-row" data-keys="ctrl y accept confirm completion"><div class="keys"><kbd>Ctrl+y</kbd></div><div class="desc">Accept completion</div></div>
+      <div class="keymap-row" data-keys="leader xx diagnostics trouble errors lsp"><div class="keys"><kbd>Space</kbd><kbd>xx</kbd></div><div class="desc">Toggle Trouble (diagnostics list)</div></div>
+      <div class="keymap-row" data-keys="bracket d next prev diagnostic error warning"><div class="keys"><kbd>]d</kbd> / <kbd>[d</kbd></div><div class="desc">Next / prev diagnostic</div></div>
+      <div class="keymap-row" data-keys="leader gg lazygit git"><div class="keys"><kbd>Space</kbd><kbd>gg</kbd></div><div class="desc">Open LazyGit</div></div>
+    </div>
+    <div class="leader-note">
+      <strong>Enable LazyVim extras for JS/TS:</strong> open <kbd>:LazyExtras</kbd> and enable <strong>lang.typescript</strong>, <strong>formatting.prettier</strong>, <strong>linting.eslint</strong>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Phase 4 — Productivity (Week 4)</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="macro record q start stop replay at"><div class="keys"><kbd>q</kbd><em>a</em></div><div class="desc">Start recording macro into register <em>a</em></div></div>
+      <div class="keymap-row" data-keys="macro stop recording q"><div class="keys"><kbd>q</kbd> (in recording)</div><div class="desc">Stop recording macro</div></div>
+      <div class="keymap-row" data-keys="macro replay at play @a"><div class="keys"><kbd>@</kbd><em>a</em></div><div class="desc">Replay macro from register <em>a</em></div></div>
+      <div class="keymap-row" data-keys="macro repeat last @@ replay"><div class="keys"><kbd>@@</kbd></div><div class="desc">Replay last macro</div></div>
+      <div class="keymap-row" data-keys="multi-cursor cgn star repeat dot replace word"><div class="keys"><kbd>*</kbd> → <kbd>cgn</kbd> → <kbd>.</kbd></div><div class="desc">Multi-cursor pattern: select word, change next match, repeat with dot</div></div>
+      <div class="keymap-row" data-keys="split vertical horizontal window leader | -"><div class="keys"><kbd>Space</kbd><kbd>|</kbd> / <kbd>Space</kbd><kbd>-</kbd></div><div class="desc">Split vertical / horizontal</div></div>
+      <div class="keymap-row" data-keys="window navigate ctrl h j k l"><div class="keys"><kbd>Ctrl+h/j/k/l</kbd></div><div class="desc">Navigate between splits</div></div>
+      <div class="keymap-row" data-keys="close window split leader wd"><div class="keys"><kbd>Space</kbd><kbd>wd</kbd></div><div class="desc">Close window/split</div></div>
+      <div class="keymap-row" data-keys="tab new tabnew leader tab"><div class="keys"><kbd>Space</kbd><kbd>&lt;tab&gt;&lt;tab&gt;</kbd></div><div class="desc">New tab</div></div>
+      <div class="keymap-row" data-keys="tab next prev navigate bracket tab"><div class="keys"><kbd>]t</kbd> / <kbd>[t</kbd></div><div class="desc">Next / prev tab</div></div>
+      <div class="keymap-row" data-keys="terminal float leader ft leader fT"><div class="keys"><kbd>Space</kbd><kbd>ft</kbd></div><div class="desc">Toggle floating terminal</div></div>
+      <div class="keymap-row" data-keys="terminal escape ctrl escape"><div class="keys"><kbd>Ctrl+/</kbd></div><div class="desc">Close floating terminal</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Tips &amp; Milestones</div>
+    <div class="leader-note">
+      <strong>5 Rules for learning Vim:</strong><br>
+      1. <strong>Stop using arrow keys</strong> — use hjkl only.<br>
+      2. <strong>One new thing per day</strong> — learn it, use it 20× until it's muscle memory.<br>
+      3. <strong>Never reach for the mouse</strong> — if you want the mouse, find the Vim way instead.<br>
+      4. <strong>Use . (dot) constantly</strong> — if you do something twice, the third time use dot repeat.<br>
+      5. <strong>Motions &gt; line numbers</strong> — think in words, objects, and targets, not row/col coords.
+    </div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="milestone week 1 survival basics"><div class="keys"><kbd>Week 1</kbd></div><div class="desc">[ ] Can open, edit, save, and quit without touching the mouse</div></div>
+      <div class="keymap-row" data-keys="milestone week 2 movement motions text objects"><div class="keys"><kbd>Week 2</kbd></div><div class="desc">[ ] Navigate any file using w/b/f/t and text objects instead of arrow keys</div></div>
+      <div class="keymap-row" data-keys="milestone week 3 lsp javascript typescript workflow"><div class="keys"><kbd>Week 3</kbd></div><div class="desc">[ ] Full JS/TS edit loop: gd, gr, K, ca, cf — no VS Code needed</div></div>
+      <div class="keymap-row" data-keys="milestone week 4 macro multi-cursor productivity"><div class="keys"><kbd>Week 4</kbd></div><div class="desc">[ ] Use macros and * → cgn → . for bulk edits</div></div>
+      <div class="keymap-row" data-keys="milestone week 5 fluent fast vim lazyvim"><div class="keys"><kbd>Week 5+</kbd></div><div class="desc">[ ] Faster in Vim than VS Code for daily JS/TS tasks</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- GIT WORKTREE TAB -->
+<div class="tab-panel" id="tab-gitworktree">
+
+  <div class="section">
+    <div class="section-title">Core Commands</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="git worktree list"><div class="keys"><kbd>git worktree list</kbd></div><div class="desc">List all worktrees</div></div>
+      <div class="keymap-row" data-keys="git worktree add path branch"><div class="keys"><kbd>git worktree add &lt;path&gt; &lt;branch&gt;</kbd></div><div class="desc">Create worktree from existing branch</div></div>
+      <div class="keymap-row" data-keys="git worktree add path -b new-branch base"><div class="keys"><kbd>git worktree add &lt;path&gt; -b &lt;new&gt; &lt;base&gt;</kbd></div><div class="desc">Create new branch + worktree</div></div>
+      <div class="keymap-row" data-keys="git worktree remove path"><div class="keys"><kbd>git worktree remove &lt;path&gt;</kbd></div><div class="desc">Remove a worktree</div></div>
+      <div class="keymap-row" data-keys="git worktree prune"><div class="keys"><kbd>git worktree prune</kbd></div><div class="desc">Clean up deleted/prunable worktrees</div></div>
+      <div class="keymap-row" data-keys="git worktree lock path"><div class="keys"><kbd>git worktree lock &lt;path&gt;</kbd></div><div class="desc">Prevent worktree from being pruned</div></div>
+      <div class="keymap-row" data-keys="git worktree unlock path"><div class="keys"><kbd>git worktree unlock &lt;path&gt;</kbd></div><div class="desc">Unlock worktree</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Pro Setup — Bare Clone</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="git clone --bare repo-url .bare"><div class="keys"><kbd>git clone --bare &lt;url&gt; .bare</kbd></div><div class="desc">Clone bare repo (history only, no working files)</div></div>
+      <div class="keymap-row" data-keys="echo gitdir .bare > .git"><div class="keys"><kbd>echo "gitdir: ./.bare" &gt; .git</kbd></div><div class="desc">Link root to bare repo</div></div>
+      <div class="keymap-row" data-keys="git config remote.origin.fetch refs heads remotes"><div class="keys"><kbd>git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"</kbd></div><div class="desc">Fix "blind clone" — enable tracking all remote branches</div></div>
+      <div class="keymap-row" data-keys="git fetch --all"><div class="keys"><kbd>git fetch --all</kbd></div><div class="desc">Fetch all remote branches</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Branch Commands</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="git branch -r remote branches"><div class="keys"><kbd>git branch -r</kbd></div><div class="desc">Show remote branches</div></div>
+      <div class="keymap-row" data-keys="git worktree add dev dev existing branch"><div class="keys"><kbd>git worktree add dev dev</kbd></div><div class="desc">Worktree from existing branch</div></div>
+      <div class="keymap-row" data-keys="git worktree add feature-x -b feature-x main new branch"><div class="keys"><kbd>git worktree add feature-x -b feature-x main</kbd></div><div class="desc">New branch worktree from main</div></div>
+      <div class="keymap-row" data-keys="git worktree add dev origin/dev remote branch"><div class="keys"><kbd>git worktree add dev origin/dev</kbd></div><div class="desc">Worktree from remote branch</div></div>
+      <div class="keymap-row" data-keys="git worktree add ../hotfix different folder"><div class="keys"><kbd>git worktree add ../hotfix</kbd></div><div class="desc">Worktree in a different folder</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Mental Model</div>
+    <div class="keymaps-grid">
+      <div class="keymap-row" data-keys="one repo multiple branches parallel workspaces no stash"><div class="keys"><kbd>One brain</kbd></div><div class="desc">Shared .git history — multiple working directories</div></div>
+      <div class="keymap-row" data-keys="same branch conflict cannot checkout"><div class="keys"><kbd>Rule</kbd></div><div class="desc">Cannot checkout the same branch in two worktrees</div></div>
+      <div class="keymap-row" data-keys="fetch once available everywhere shared config hooks"><div class="keys"><kbd>Sync</kbd></div><div class="desc">Fetch once → visible in all worktrees</div></div>
+      <div class="keymap-row" data-keys="name folders same as branch convention"><div class="keys"><kbd>Tip</kbd></div><div class="desc">Name folder same as branch: <em>git worktree add feature/login feature/login</em></div></div>
     </div>
   </div>
 
